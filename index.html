@@ -1,0 +1,3664 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Link Index</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --surface-muted: #f7f7f5;
+        --ink: #37352f;
+        --muted: #787774;
+        --faint: #9b9a97;
+        --line: #e9e9e7;
+        --line-strong: #d3d3d1;
+        --accent: #2f3437;
+        --accent-soft: #eeeeec;
+        --focus: #8a8a86;
+        --danger: #a9352b;
+        --radius: 6px;
+        --shadow: 0 12px 32px rgba(15, 15, 15, 0.08);
+        font-family:
+          ui-sans-serif,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Helvetica,
+          "Apple Color Emoji",
+          Arial,
+          "Noto Sans JP",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 15px;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background: var(--bg);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        color: inherit;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .app {
+        width: min(1120px, calc(100% - 32px));
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 34px 0 48px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .masthead {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px;
+        align-items: end;
+        padding-bottom: 8px;
+      }
+
+      .eyebrow {
+        margin: 0 0 7px;
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 36px;
+        line-height: 1.18;
+        letter-spacing: 0;
+        font-weight: 700;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .settings-wrap {
+        position: relative;
+      }
+
+      .settings-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        z-index: 15;
+        display: none;
+        min-width: 168px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        padding: 4px;
+      }
+
+      .settings-menu.open {
+        display: grid;
+        gap: 2px;
+      }
+
+      .settings-menu .button {
+        width: 100%;
+        justify-content: flex-start;
+        border: 0;
+        background: transparent;
+      }
+
+      .settings-menu .button:hover {
+        background: var(--surface-muted);
+      }
+
+      .button {
+        min-height: 36px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        cursor: pointer;
+        transition:
+          background 120ms ease,
+          color 120ms ease,
+          border-color 120ms ease;
+        white-space: nowrap;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .button:hover {
+        border-color: var(--line-strong);
+        background: var(--surface-muted);
+      }
+
+      .button:active {
+        background: #ededeb;
+      }
+
+      .button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      .button.icon {
+        width: 36px;
+        padding: 0;
+      }
+
+      .button.icon svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+      }
+
+      .button.danger {
+        color: var(--danger);
+      }
+
+      .button.subtle {
+        color: var(--muted);
+      }
+
+      .button.pin-action {
+        min-width: 72px;
+        border-color: var(--line-strong);
+      }
+
+      .button.pin-action.active {
+        background: var(--accent-soft);
+        border-color: var(--line-strong);
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: auto minmax(280px, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        margin: 18px 0 12px;
+      }
+
+      .segments {
+        display: inline-grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface-muted);
+      }
+
+      .segment {
+        height: 32px;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--muted);
+        padding: 0 16px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .segment[aria-pressed="true"] {
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: 0 1px 2px rgba(15, 15, 15, 0.08);
+      }
+
+      .search-wrap {
+        position: relative;
+      }
+
+      .search-wrap svg {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        width: 16px;
+        height: 16px;
+        transform: translateY(-50%);
+        color: var(--faint);
+        pointer-events: none;
+      }
+
+      .search {
+        width: 100%;
+        height: 40px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 0 14px 0 38px;
+        color: var(--ink);
+        outline: none;
+        font-size: 14px;
+      }
+
+      .search:focus,
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: var(--focus);
+        box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.14);
+      }
+
+      .toolbar-meta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .filter-toggle[aria-pressed="true"],
+      .filter-toggle.active {
+        background: var(--accent-soft);
+        border-color: var(--line-strong);
+        color: var(--ink);
+      }
+
+      .stats {
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .tagbar {
+        display: none;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .tagbar.open {
+        display: flex;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--muted);
+        min-height: 30px;
+        padding: 0 11px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .chip[aria-pressed="true"] {
+        background: var(--accent-soft);
+        border-color: var(--accent-soft);
+        color: var(--ink);
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        align-items: start;
+      }
+
+      .favorites-section {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .favorites-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .favorites-title-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .favorites-icon {
+        width: 16px;
+        height: 16px;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+      }
+
+      .favorites-icon svg {
+        width: 12px;
+        height: 12px;
+        display: block;
+      }
+
+      .favorites-title {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.35;
+        color: var(--muted);
+      }
+
+      .favorites-section .link-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+
+      .group-section {
+        border-top: 1px solid var(--line);
+        padding-top: 12px;
+        min-width: 0;
+      }
+
+      .group-section.collapsed {
+        padding-bottom: 4px;
+      }
+
+      .group-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 32px;
+        margin-bottom: 9px;
+      }
+
+      .group-section.collapsed .group-head {
+        margin-bottom: 0;
+      }
+
+      .group-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+
+      .group-title-area {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .group-title-wrap {
+        appearance: none;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--ink);
+        padding: 3px 6px 3px 2px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        cursor: pointer;
+      }
+
+      .group-title-wrap:hover {
+        background: var(--surface-muted);
+      }
+
+      .group-add {
+        width: 24px;
+        height: 24px;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        line-height: 1;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 120ms ease,
+          background 120ms ease,
+          color 120ms ease;
+      }
+
+      .group-section:hover .group-add,
+      .group-add:focus-visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .group-add:hover {
+        background: var(--surface-muted);
+        color: var(--ink);
+      }
+
+      .group-toggle {
+        width: 16px;
+        height: 16px;
+        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 120ms ease;
+      }
+
+      .group-section.collapsed .group-toggle {
+        transform: rotate(-90deg);
+      }
+
+      .group-toggle svg {
+        width: 13px;
+        height: 13px;
+        display: block;
+      }
+
+      .count {
+        color: var(--muted);
+        font-size: 12px;
+        font-family:
+          ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono",
+          Menlo, monospace;
+      }
+
+      mark {
+        border-radius: 3px;
+        background: #fff2a8;
+        color: inherit;
+        padding: 0 1px;
+      }
+
+      .link-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 8px;
+      }
+
+      .link-grid[hidden] {
+        display: none;
+      }
+
+      .link-button {
+        width: 100%;
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 8px 10px;
+        text-align: left;
+        cursor: pointer;
+        overflow: hidden;
+        transition:
+          background 120ms ease,
+          border-color 120ms ease;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .link-button:hover {
+        background: var(--surface-muted);
+        border-color: var(--line-strong);
+      }
+
+      .board-link-content {
+        display: block;
+        min-width: 0;
+      }
+
+      .board-link-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .list {
+        --list-columns: minmax(0, 1.2fr) minmax(0, 1.25fr) 120px minmax(0, 160px) 214px;
+      }
+
+      .list-head {
+        display: grid;
+        grid-template-columns: var(--list-columns);
+        gap: 14px;
+        align-items: center;
+        min-width: 0;
+        padding: 4px 0 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .list-head > div:last-child {
+        justify-self: end;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: var(--list-columns);
+        gap: 14px;
+        align-items: start;
+        padding: 13px 0;
+        border-top: 1px solid var(--line);
+        min-width: 0;
+      }
+
+      .row-title {
+        min-width: 0;
+        line-height: 1.4;
+      }
+
+      .row-title-button {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        color: var(--accent);
+        text-align: left;
+        cursor: pointer;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        text-underline-offset: 3px;
+        transition:
+          color 120ms ease,
+          text-decoration-color 120ms ease;
+      }
+
+      .row-title-button:hover {
+        color: var(--ink);
+        text-decoration-color: currentColor;
+      }
+
+      .row-url {
+        appearance: none;
+        min-width: 0;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        color: var(--muted);
+        font-size: 12px;
+        font-family:
+          ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono",
+          Menlo, monospace;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: left;
+        cursor: copy;
+      }
+
+      .row-url-cell {
+        min-width: 0;
+        display: grid;
+        gap: 3px;
+      }
+
+      .row-url:hover {
+        color: var(--ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .copy-feedback {
+        min-height: 14px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 120ms ease;
+      }
+
+      .copy-feedback.show {
+        opacity: 1;
+      }
+
+      .row-group {
+        min-width: 0;
+        color: var(--muted);
+        font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row-tags {
+        min-width: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-content: start;
+        overflow: hidden;
+      }
+
+      .mini-tag {
+        min-width: 0;
+        max-width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        padding: 2px 7px;
+        font-size: 11px;
+        flex: 0 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row-actions {
+        min-width: 0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+      }
+
+      .row-actions .button:first-child {
+        min-width: 72px;
+      }
+
+      .summary {
+        display: grid;
+        gap: 8px;
+        padding: 18px 20px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .summary strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .empty {
+        padding: 56px 16px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .empty-title {
+        color: var(--muted);
+      }
+
+      .empty-detail {
+        margin-top: 8px;
+        color: var(--faint);
+        font-size: 13px;
+      }
+
+      .active-filters {
+        display: none;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: -4px 0 14px;
+      }
+
+      .active-filters.open {
+        display: flex;
+      }
+
+      .filter-pill {
+        min-height: 30px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface-muted);
+        color: var(--ink);
+        padding: 0 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+
+      .filter-pill span {
+        color: var(--muted);
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(15, 15, 15, 0.22);
+        z-index: 20;
+      }
+
+      .modal.open {
+        display: flex;
+      }
+
+      .dialog {
+        width: min(680px, 100%);
+        max-height: calc(100vh - 36px);
+        overflow: auto;
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .dialog-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .dialog-title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.3;
+      }
+
+      .form {
+        display: grid;
+        gap: 16px;
+        padding: 18px 20px 20px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .field input,
+      .field textarea,
+      .field select {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--ink);
+        outline: none;
+        padding: 10px 11px;
+      }
+
+      .field textarea {
+        min-height: 58px;
+        resize: vertical;
+        line-height: 1.6;
+      }
+
+      .link-meta-grid {
+        display: grid;
+        grid-template-columns: minmax(160px, 0.85fr) minmax(220px, 1.15fr);
+        gap: 12px;
+        align-items: start;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .tag-select {
+        position: relative;
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        padding: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .tag-select:focus-within {
+        border-color: var(--focus);
+        box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.14);
+      }
+
+      .group-select {
+        position: relative;
+      }
+
+      .group-menu {
+        position: absolute;
+        z-index: 25;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        display: none;
+        max-height: 190px;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        box-shadow: var(--shadow);
+        padding: 4px;
+      }
+
+      .group-menu.open {
+        display: grid;
+        gap: 2px;
+      }
+
+      .group-option {
+        min-height: 32px;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--ink);
+        padding: 0 9px;
+        text-align: left;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .group-option:hover,
+      .group-option.active {
+        background: var(--surface-muted);
+      }
+
+      .tag-token {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        max-width: 100%;
+        min-height: 28px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface-muted);
+        padding: 0 8px;
+        color: var(--ink);
+        font-size: 13px;
+      }
+
+      #selectedTags {
+        display: contents;
+      }
+
+      .tag-remove {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        color: var(--muted);
+        cursor: pointer;
+        line-height: 1;
+      }
+
+      .tag-input {
+        flex: 1 1 130px;
+        min-width: 110px;
+        height: 30px;
+        border: 0;
+        outline: none;
+        padding: 0 5px;
+        color: var(--ink);
+        background: transparent;
+      }
+
+      .tag-menu {
+        position: absolute;
+        z-index: 25;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        display: none;
+        max-height: 190px;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        box-shadow: var(--shadow);
+        padding: 4px;
+      }
+
+      .tag-menu.open {
+        display: grid;
+        gap: 2px;
+      }
+
+      .tag-option {
+        min-height: 32px;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--ink);
+        padding: 0 9px;
+        text-align: left;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .tag-option:hover,
+      .tag-option.active {
+        background: var(--surface-muted);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .group-manager {
+        display: grid;
+        gap: 14px;
+        padding: 18px 20px 20px;
+      }
+
+      .inline-form {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: end;
+      }
+
+      .inline-form .button {
+        height: 40px;
+        min-width: 72px;
+      }
+
+      .group-list {
+        display: grid;
+        gap: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .group-next-action {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface-muted);
+        padding: 10px 11px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .group-next-action.open {
+        display: flex;
+      }
+
+      .group-next-action strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .group-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        min-height: 44px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .group-name {
+        appearance: none;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--ink);
+        padding: 4px 6px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 500;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .group-name:hover {
+        background: var(--surface-muted);
+      }
+
+      .group-name:disabled {
+        cursor: default;
+        color: var(--muted);
+      }
+
+      .group-name:disabled:hover {
+        background: transparent;
+      }
+
+      .group-edit-input {
+        width: 100%;
+        min-width: 0;
+        height: 34px;
+        border: 1px solid var(--focus);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--ink);
+        padding: 0 9px;
+        outline: none;
+      }
+
+      .group-meta {
+        color: var(--muted);
+        font-size: 12px;
+        margin-left: 8px;
+        font-weight: 400;
+      }
+
+      .group-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+      }
+
+      .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        padding-top: 4px;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+        pointer-events: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--accent);
+        color: #ffffff;
+        padding: 10px 14px;
+        font-size: 13px;
+        transition:
+          opacity 180ms ease,
+          transform 180ms ease;
+        z-index: 30;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .hidden-input {
+        display: none;
+      }
+
+      .footer {
+        margin-top: auto;
+        padding-top: 44px;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+      }
+
+      @media (max-width: 900px) {
+        .masthead,
+        .toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .actions {
+          justify-content: flex-start;
+        }
+
+        .toolbar-meta {
+          justify-content: flex-start;
+        }
+
+        .board {
+          grid-template-columns: 1fr;
+        }
+
+        .row {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 7px;
+        }
+
+        .list-head {
+          display: none;
+        }
+
+        .row-actions {
+          justify-content: flex-start;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .app {
+          width: min(100% - 22px, 1180px);
+          padding-top: 18px;
+        }
+
+        h1 {
+          font-size: 28px;
+        }
+
+        .toolbar {
+          gap: 10px;
+        }
+
+        .segments {
+          width: 100%;
+        }
+
+        .segment {
+          padding: 0 10px;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .link-meta-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .inline-form {
+          grid-template-columns: 1fr;
+        }
+
+        .inline-form .button {
+          width: 100%;
+        }
+
+        .link-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">Personal document index</p>
+          <h1>Link Index</h1>
+        </div>
+        <div class="actions" aria-label="データ操作">
+          <button class="button" id="groupsButton" type="button">Groups</button>
+          <div class="settings-wrap">
+            <button
+              class="button icon"
+              id="settingsButton"
+              type="button"
+              aria-label="設定"
+              aria-expanded="false"
+              title="Settings"
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+                <path
+                  d="M19.2 13.4a7.8 7.8 0 0 0 .05-2.8l2-1.55-2-3.45-2.45.98a8.4 8.4 0 0 0-2.4-1.4L14 2.55h-4l-.4 2.63a8.4 8.4 0 0 0-2.4 1.4L4.75 5.6l-2 3.45 2 1.55a7.8 7.8 0 0 0 .05 2.8l-2.05 1.6 2 3.45 2.5-1a8.1 8.1 0 0 0 2.35 1.35l.4 2.65h4l.4-2.65a8.1 8.1 0 0 0 2.35-1.35l2.5 1 2-3.45-2.05-1.6Z"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <div
+              class="settings-menu"
+              id="settingsMenu"
+              role="menu"
+              aria-label="Settings"
+            >
+              <button
+                class="button"
+                id="importButton"
+                type="button"
+                role="menuitem"
+              >
+                Import
+              </button>
+              <button
+                class="button"
+                id="exportButton"
+                type="button"
+                role="menuitem"
+              >
+                Export
+              </button>
+              <button
+                class="button"
+                id="dataButton"
+                type="button"
+                role="menuitem"
+              >
+                Data
+              </button>
+            </div>
+          </div>
+          <button class="button primary" id="newButton" type="button">
+            + New
+          </button>
+          <input
+            class="hidden-input"
+            id="importFile"
+            type="file"
+            accept="application/json,.json"
+          />
+        </div>
+      </header>
+
+      <section class="toolbar" aria-label="表示と検索">
+        <div class="segments" role="group" aria-label="ビュー切替">
+          <button
+            class="segment"
+            id="boardTab"
+            type="button"
+            aria-pressed="true"
+          >
+            Board
+          </button>
+          <button
+            class="segment"
+            id="listTab"
+            type="button"
+            aria-pressed="false"
+          >
+            List
+          </button>
+        </div>
+        <label class="search-wrap" aria-label="検索">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+          <input
+            class="search"
+            id="searchInput"
+            type="search"
+            placeholder="タイトル、URL、グループ、タグ、メモを検索"
+          />
+        </label>
+        <div class="toolbar-meta">
+          <button
+            class="button icon filter-toggle"
+            id="tagToggleButton"
+            type="button"
+            aria-label="タグフィルターを表示"
+            aria-expanded="false"
+            aria-pressed="false"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M4 6h16M7 12h10M10 18h4"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <div class="stats" id="stats">0 links</div>
+        </div>
+      </section>
+
+      <div
+        class="active-filters"
+        id="activeFilters"
+        aria-label="有効な絞り込み"
+      ></div>
+      <nav class="tagbar" id="tagbar" aria-label="タグ絞り込み"></nav>
+
+      <main>
+        <section
+          class="view active"
+          id="boardView"
+          aria-label="Board view"
+        ></section>
+        <section class="view" id="listView" aria-label="List view"></section>
+      </main>
+
+      <footer class="footer">
+        <small>&copy; 2026 Link Index.</small>
+      </footer>
+    </div>
+
+    <div
+      class="modal"
+      id="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+      <div class="dialog">
+        <div class="dialog-head">
+          <h2 class="dialog-title" id="modalTitle">New link</h2>
+          <button
+            class="button icon"
+            id="closeModalButton"
+            type="button"
+            aria-label="閉じる"
+          >
+            x
+          </button>
+        </div>
+        <form class="form" id="linkForm">
+          <div class="field">
+            <label for="titleInput">Title *</label>
+            <input
+              id="titleInput"
+              name="title"
+              type="text"
+              placeholder="例: 基本設計書"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="urlInput">URL *</label>
+            <input
+              id="urlInput"
+              name="url"
+              type="url"
+              placeholder="https://example.sharepoint.com/..."
+              required
+            />
+            <div class="hint">
+              URLを貼り付けると、タイトルが空の場合だけ候補を自動入力します。
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="link-meta-grid">
+              <div class="field">
+                <label for="groupInput">Group</label>
+                <div class="group-select" id="groupSelect">
+                  <input
+                    id="groupInput"
+                    name="group"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="グループを選択または入力"
+                  />
+                  <div class="group-menu" id="groupMenu"></div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="tagsInput">Tags</label>
+                <div class="tag-select" id="tagSelect">
+                  <div id="selectedTags"></div>
+                  <input
+                    class="tag-input"
+                    id="tagsInput"
+                    name="tags"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="タグを選択または入力"
+                  />
+                  <div class="tag-menu" id="tagMenu"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="noteInput">Note</label>
+            <textarea
+              id="noteInput"
+              name="note"
+              placeholder="必要なときだけ補足"
+            ></textarea>
+          </div>
+          <div class="dialog-actions">
+            <button class="button" id="cancelButton" type="button">
+              Cancel
+            </button>
+            <button class="button primary" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div
+      class="modal"
+      id="groupsModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="groupsModalTitle"
+    >
+      <div class="dialog">
+        <div class="dialog-head">
+          <h2 class="dialog-title" id="groupsModalTitle">Groups</h2>
+          <button
+            class="button icon"
+            id="closeGroupsButton"
+            type="button"
+            aria-label="閉じる"
+          >
+            x
+          </button>
+        </div>
+        <div class="group-manager">
+          <form class="inline-form" id="groupForm">
+            <div class="field">
+              <label for="newGroupInput">Group name</label>
+              <input
+                id="newGroupInput"
+                type="text"
+                placeholder="例: 移行工程"
+              />
+            </div>
+            <button class="button primary" type="submit">Add</button>
+          </form>
+          <div class="group-next-action" id="groupNextAction">
+            <span
+              ><strong id="groupNextName"></strong>
+              にリンクを追加しますか？</span
+            >
+            <button class="button primary" id="groupNextButton" type="button">
+              Add Link
+            </button>
+          </div>
+          <div class="hint">
+            ここで追加したグループは、リンク登録時のGroup候補とBoardの並びに反映されます。
+          </div>
+          <div class="group-list" id="groupList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal"
+      id="importModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="importModalTitle"
+    >
+      <div class="dialog">
+        <div class="dialog-head">
+          <h2 class="dialog-title" id="importModalTitle">Import</h2>
+          <button
+            class="button icon"
+            id="closeImportButton"
+            type="button"
+            aria-label="閉じる"
+          >
+            x
+          </button>
+        </div>
+        <div class="summary">
+          <div id="importSummary"></div>
+          <div class="dialog-actions">
+            <button class="button" id="cancelImportButton" type="button">
+              Cancel
+            </button>
+            <button class="button" id="mergeImportButton" type="button">
+              Merge
+            </button>
+            <button
+              class="button primary"
+              id="replaceImportButton"
+              type="button"
+            >
+              Replace
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal"
+      id="dataModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dataModalTitle"
+    >
+      <div class="dialog">
+        <div class="dialog-head">
+          <h2 class="dialog-title" id="dataModalTitle">Data</h2>
+          <button
+            class="button icon"
+            id="closeDataButton"
+            type="button"
+            aria-label="閉じる"
+          >
+            x
+          </button>
+        </div>
+        <div class="summary">
+          <div>
+            localStorage上のリンクデータを整理できます。操作はこのブラウザ内のデータにだけ反映されます。
+          </div>
+          <div id="storageUsage">Storage: -</div>
+          <div class="dialog-actions">
+            <button class="button" id="restoreSamplesButton" type="button">
+              Restore Samples
+            </button>
+            <button class="button danger" id="clearDataButton" type="button">
+              Clear All
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const STORAGE_KEY = "link-index:v1";
+      const NO_GROUP = "no group";
+      const DEFAULT_GROUPS = [
+        "設計工程",
+        "製造工程",
+        "テスト工程",
+        "運用・申請",
+        "会議・共有",
+        "社内ポータル",
+        NO_GROUP,
+      ];
+
+      function uid() {
+        try {
+          if (typeof crypto !== "undefined" && crypto.randomUUID)
+            return crypto.randomUUID();
+        } catch {}
+        return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+      }
+
+      const sampleLinks = [
+        {
+          id: uid(),
+          title: "基本設計書",
+          url: "https://contoso.sharepoint.com/sites/project/Shared%20Documents/%E5%9F%BA%E6%9C%AC%E8%A8%AD%E8%A8%88%E6%9B%B8.xlsx",
+          group: "設計工程",
+          tags: ["design", "sharepoint"],
+          note: "画面・APIの基本方針",
+          createdAt: Date.now() - 500000,
+          pinned: true,
+          lastOpenedAt: Date.now() - 1000 * 60 * 18,
+        },
+        {
+          id: uid(),
+          title: "製造タスク管理表",
+          url: "https://contoso.sharepoint.com/sites/project/Lists/build",
+          group: "製造工程",
+          tags: ["task"],
+          note: "製造中の作業確認",
+          createdAt: Date.now() - 400000,
+          pinned: true,
+        },
+        {
+          id: uid(),
+          title: "結合テスト観点一覧",
+          url: "https://contoso.sharepoint.com/sites/project/Shared%20Documents/test-case.xlsx",
+          group: "テスト工程",
+          tags: ["test", "excel"],
+          note: "",
+          createdAt: Date.now() - 300000,
+          lastOpenedAt: Date.now() - 1000 * 60 * 42,
+        },
+        {
+          id: uid(),
+          title: "週次定例メモ",
+          url: "https://contoso.sharepoint.com/sites/project/Shared%20Documents/meeting-note.docx",
+          group: "会議・共有",
+          tags: ["meeting"],
+          note: "",
+          createdAt: Date.now() - 200000,
+          lastOpenedAt: Date.now() - 1000 * 60 * 60 * 3,
+        },
+        {
+          id: uid(),
+          title: "API仕様書",
+          url: "https://contoso.sharepoint.com/sites/project/Shared%20Documents/api-spec.yaml",
+          group: "設計工程",
+          tags: ["api", "design"],
+          note: "外部連携APIの定義",
+          createdAt: Date.now() - 180000,
+        },
+        {
+          id: uid(),
+          title: "画面遷移図",
+          url: "https://contoso.sharepoint.com/sites/project/Shared%20Documents/screen-flow.pdf",
+          group: "設計工程",
+          tags: ["ui", "pdf"],
+          note: "主要導線の確認用",
+          createdAt: Date.now() - 170000,
+        },
+        {
+          id: uid(),
+          title: "レビュー指摘一覧",
+          url: "https://contoso.sharepoint.com/sites/project/Lists/review-comments",
+          group: "製造工程",
+          tags: ["review", "task"],
+          note: "実装レビューの残件管理",
+          createdAt: Date.now() - 160000,
+          lastOpenedAt: Date.now() - 1000 * 60 * 60 * 8,
+        },
+        {
+          id: uid(),
+          title: "CI実行結果",
+          url: "https://dev.azure.com/contoso/project/_build",
+          group: "製造工程",
+          tags: ["ci"],
+          note: "ビルド・静的解析の確認",
+          createdAt: Date.now() - 150000,
+          pinned: true,
+        },
+        {
+          id: uid(),
+          title: "不具合管理ボード",
+          url: "https://contoso.sharepoint.com/sites/project/Lists/bugs",
+          group: "テスト工程",
+          tags: ["bug", "test"],
+          note: "検出不具合と対応状況",
+          createdAt: Date.now() - 140000,
+        },
+        {
+          id: uid(),
+          title: "リリース判定チェックリスト",
+          url: "https://contoso.sharepoint.com/sites/project/Shared%20Documents/release-checklist.xlsx",
+          group: "運用・申請",
+          tags: ["release", "excel"],
+          note: "本番反映前の確認項目",
+          createdAt: Date.now() - 130000,
+          lastOpenedAt: Date.now() - 1000 * 60 * 60 * 24,
+        },
+        {
+          id: uid(),
+          title: "作業申請フォーム",
+          url: "https://contoso.example.com/forms/work-request",
+          group: "運用・申請",
+          tags: ["request"],
+          note: "環境作業・権限申請",
+          createdAt: Date.now() - 120000,
+        },
+        {
+          id: uid(),
+          title: "Teams プロジェクトチャネル",
+          url: "https://teams.microsoft.com/l/channel/19%3aproject",
+          group: "会議・共有",
+          tags: ["teams", "meeting"],
+          note: "日次連絡と相談窓口",
+          createdAt: Date.now() - 110000,
+          lastOpenedAt: Date.now() - 1000 * 60 * 60 * 28,
+        },
+        {
+          id: uid(),
+          title: "社内ポータル",
+          url: "https://portal.contoso.example.com",
+          group: "社内ポータル",
+          tags: ["portal"],
+          note: "勤怠・社内ニュース・各種入口",
+          createdAt: Date.now() - 100000,
+          pinned: true,
+        },
+        {
+          id: uid(),
+          title: "ナレッジ検索",
+          url: "https://knowledge.contoso.example.com/search",
+          group: "社内ポータル",
+          tags: ["knowledge"],
+          note: "過去案件や手順書の検索",
+          createdAt: Date.now() - 90000,
+        },
+      ];
+
+      const state = {
+        links: [],
+        groups: [...DEFAULT_GROUPS],
+        query: "",
+        tag: "all",
+        view: "board",
+        editingId: null,
+        autoTitleValue: "",
+        formTags: [],
+        tagMenuOpen: false,
+        tagActiveIndex: 0,
+        tagbarOpen: false,
+        settingsOpen: false,
+        groupMenuOpen: false,
+        groupActiveIndex: 0,
+        groupFilter: "",
+        collapsedGroups: [],
+        editingGroup: null,
+        pendingImport: null,
+        copiedLinkId: null,
+        pendingGroupLink: null,
+        formLoadedFor: null,
+      };
+
+      const els = {
+        boardTab: document.querySelector("#boardTab"),
+        listTab: document.querySelector("#listTab"),
+        searchInput: document.querySelector("#searchInput"),
+        tagToggleButton: document.querySelector("#tagToggleButton"),
+        stats: document.querySelector("#stats"),
+        activeFilters: document.querySelector("#activeFilters"),
+        tagbar: document.querySelector("#tagbar"),
+        boardView: document.querySelector("#boardView"),
+        listView: document.querySelector("#listView"),
+        modal: document.querySelector("#modal"),
+        modalTitle: document.querySelector("#modalTitle"),
+        linkForm: document.querySelector("#linkForm"),
+        newButton: document.querySelector("#newButton"),
+        groupsButton: document.querySelector("#groupsButton"),
+        settingsButton: document.querySelector("#settingsButton"),
+        settingsMenu: document.querySelector("#settingsMenu"),
+        dataButton: document.querySelector("#dataButton"),
+        closeModalButton: document.querySelector("#closeModalButton"),
+        cancelButton: document.querySelector("#cancelButton"),
+        groupsModal: document.querySelector("#groupsModal"),
+        closeGroupsButton: document.querySelector("#closeGroupsButton"),
+        importModal: document.querySelector("#importModal"),
+        closeImportButton: document.querySelector("#closeImportButton"),
+        cancelImportButton: document.querySelector("#cancelImportButton"),
+        mergeImportButton: document.querySelector("#mergeImportButton"),
+        replaceImportButton: document.querySelector("#replaceImportButton"),
+        importSummary: document.querySelector("#importSummary"),
+        dataModal: document.querySelector("#dataModal"),
+        storageUsage: document.querySelector("#storageUsage"),
+        closeDataButton: document.querySelector("#closeDataButton"),
+        clearDataButton: document.querySelector("#clearDataButton"),
+        restoreSamplesButton: document.querySelector("#restoreSamplesButton"),
+        groupForm: document.querySelector("#groupForm"),
+        newGroupInput: document.querySelector("#newGroupInput"),
+        groupNextAction: document.querySelector("#groupNextAction"),
+        groupNextName: document.querySelector("#groupNextName"),
+        groupNextButton: document.querySelector("#groupNextButton"),
+        groupList: document.querySelector("#groupList"),
+        exportButton: document.querySelector("#exportButton"),
+        importButton: document.querySelector("#importButton"),
+        importFile: document.querySelector("#importFile"),
+        urlInput: document.querySelector("#urlInput"),
+        titleInput: document.querySelector("#titleInput"),
+        groupSelect: document.querySelector("#groupSelect"),
+        groupInput: document.querySelector("#groupInput"),
+        groupMenu: document.querySelector("#groupMenu"),
+        tagsInput: document.querySelector("#tagsInput"),
+        selectedTags: document.querySelector("#selectedTags"),
+        tagMenu: document.querySelector("#tagMenu"),
+        noteInput: document.querySelector("#noteInput"),
+        toast: document.querySelector("#toast"),
+      };
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            state.links = sampleLinks;
+            state.groups = getUniqueGroups([
+              ...DEFAULT_GROUPS,
+              ...sampleLinks.map((link) => link.group),
+            ]);
+            persist();
+            return;
+          }
+          const parsed = JSON.parse(raw);
+          state.links = Array.isArray(parsed.links)
+            ? parsed.links.map(normalizeLink)
+            : [];
+          state.groups = getUniqueGroups([
+            ...DEFAULT_GROUPS,
+            ...(Array.isArray(parsed.groups) ? parsed.groups : []),
+            ...state.links.map((link) => link.group),
+          ]);
+          state.collapsedGroups = Array.isArray(parsed.collapsedGroups)
+            ? parsed.collapsedGroups.map(cleanGroup)
+            : [];
+        } catch {
+          state.links = sampleLinks;
+          state.groups = getUniqueGroups([
+            ...DEFAULT_GROUPS,
+            ...sampleLinks.map((link) => link.group),
+          ]);
+          persist();
+        }
+      }
+
+      function persist() {
+        try {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              version: 1,
+              groups: state.groups,
+              collapsedGroups: state.collapsedGroups,
+              links: state.links,
+            }),
+          );
+        } catch (error) {
+          const quotaExceeded =
+            error && (error.name === "QuotaExceededError" || error.code === 22);
+          showToast(
+            quotaExceeded
+              ? "保存容量の上限に達しました。Exportでバックアップしてください"
+              : "データの保存に失敗しました",
+          );
+        }
+      }
+
+      function normalizeLink(link) {
+        return {
+          id: link.id || uid(),
+          title: String(link.title || "").trim(),
+          url: normalizeUrl(String(link.url || "").trim()),
+          group: cleanGroup(link.group),
+          tags: normalizeTags(
+            Array.isArray(link.tags) ? link.tags.join(",") : link.tags || "",
+          ),
+          note: String(link.note || "").trim(),
+          createdAt: Number(link.createdAt) || Date.now(),
+          updatedAt: link.updatedAt ? Number(link.updatedAt) : undefined,
+          pinned: Boolean(link.pinned),
+          lastOpenedAt: link.lastOpenedAt
+            ? Number(link.lastOpenedAt)
+            : undefined,
+        };
+      }
+
+      function normalizeUrl(value) {
+        const trimmed = value.trim();
+        if (!trimmed) return "";
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+        return `https://${trimmed}`;
+      }
+
+      function cleanGroup(value) {
+        const group = String(value || "").trim();
+        if (!group || group === "未分類") return NO_GROUP;
+        return group;
+      }
+
+      function getUniqueGroups(groups) {
+        return groups
+          .map(cleanGroup)
+          .filter((group, index, list) => list.indexOf(group) === index);
+      }
+
+      function normalizeTags(value) {
+        return String(value || "")
+          .split(",")
+          .map((tag) => tag.trim().toLowerCase())
+          .filter(Boolean)
+          .filter((tag, index, list) => list.indexOf(tag) === index);
+      }
+
+      function getQueryTerms() {
+        return state.query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      }
+
+      function escapeRegExp(value) {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }
+
+      function getFilteredLinks() {
+        const terms = getQueryTerms();
+        return state.links
+          .filter((link) => {
+            const tagMatched =
+              state.tag === "all" || link.tags.includes(state.tag);
+            if (!tagMatched) return false;
+            if (!terms.length) return true;
+            const haystack = [
+              link.title,
+              link.url,
+              link.group,
+              link.tags.join(" "),
+              link.note,
+            ]
+              .join(" ")
+              .toLowerCase();
+            return terms.every((term) => haystack.includes(term));
+          })
+          .sort(
+            (a, b) =>
+              a.group.localeCompare(b.group, "ja") ||
+              a.title.localeCompare(b.title, "ja"),
+          );
+      }
+
+      function appendHighlighted(parent, text) {
+        const terms = getQueryTerms();
+        if (!terms.length) {
+          parent.textContent = text;
+          return;
+        }
+
+        const pattern = terms
+          .slice()
+          .sort((a, b) => b.length - a.length)
+          .map(escapeRegExp)
+          .join("|");
+        const regex = new RegExp(`(${pattern})`, "gi");
+        const fragment = document.createDocumentFragment();
+        let lastIndex = 0;
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+          if (match.index > lastIndex) {
+            fragment.append(
+              document.createTextNode(text.slice(lastIndex, match.index)),
+            );
+          }
+          fragment.append(
+            Object.assign(document.createElement("mark"), {
+              textContent: match[0],
+            }),
+          );
+          lastIndex = match.index + match[0].length;
+          if (match.index === regex.lastIndex) regex.lastIndex++;
+        }
+        if (lastIndex < text.length) {
+          fragment.append(document.createTextNode(text.slice(lastIndex)));
+        }
+        parent.append(fragment);
+      }
+
+      function reconcileActiveTag() {
+        if (
+          state.tag !== "all" &&
+          !state.links.some((link) => link.tags.includes(state.tag))
+        ) {
+          state.tag = "all";
+        }
+      }
+
+      function render() {
+        reconcileActiveTag();
+        const filtered = getFilteredLinks();
+        renderStats(filtered);
+        renderTags();
+        renderActiveFilters();
+        renderGroups();
+        if (els.groupsModal.classList.contains("open")) renderGroupList();
+        if (state.view === "board") {
+          renderBoard(filtered);
+        } else {
+          renderList(filtered);
+        }
+        updateView();
+      }
+
+      function renderStats(filtered) {
+        const total = state.links.length;
+        const shown = filtered.length;
+        const groups = new Set(
+          state.links.map((link) => cleanGroup(link.group)),
+        ).size;
+        els.stats.textContent = `${shown}/${total} links · ${groups} groups`;
+      }
+
+      function renderTags() {
+        const counts = new Map();
+        state.links.forEach((link) =>
+          link.tags.forEach((tag) =>
+            counts.set(tag, (counts.get(tag) || 0) + 1),
+          ),
+        );
+        const tags = [...counts.entries()].sort((a, b) =>
+          a[0].localeCompare(b[0]),
+        );
+        els.tagbar.replaceChildren();
+        els.tagbar.append(createTagButton("all", state.links.length));
+        tags.forEach(([tag, count]) =>
+          els.tagbar.append(createTagButton(tag, count)),
+        );
+        els.tagbar.classList.toggle("open", state.tagbarOpen);
+        els.tagToggleButton.setAttribute(
+          "aria-expanded",
+          String(state.tagbarOpen),
+        );
+        els.tagToggleButton.setAttribute(
+          "aria-pressed",
+          String(state.tagbarOpen),
+        );
+        els.tagToggleButton.setAttribute(
+          "aria-label",
+          state.tagbarOpen ? "タグフィルターを非表示" : "タグフィルターを表示",
+        );
+        els.tagToggleButton.classList.toggle("active", state.tag !== "all");
+      }
+
+      function createTagButton(tag, count) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chip";
+        button.textContent = tag === "all" ? `all ${count}` : `${tag} ${count}`;
+        button.setAttribute("aria-pressed", String(state.tag === tag));
+        button.addEventListener("click", () => {
+          state.tag = state.tag === tag && tag !== "all" ? "all" : tag;
+          render();
+        });
+        return button;
+      }
+
+      function renderActiveFilters() {
+        els.activeFilters.replaceChildren();
+        if (state.tag === "all") {
+          els.activeFilters.classList.remove("open");
+          return;
+        }
+
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "filter-pill";
+        const label = document.createElement("span");
+        label.textContent = "tag";
+        chip.append(label, document.createTextNode(`${state.tag} x`));
+        chip.title = "タグ絞り込みを解除";
+        chip.addEventListener("click", () => {
+          state.tag = "all";
+          render();
+        });
+        els.activeFilters.append(chip);
+        els.activeFilters.classList.add("open");
+      }
+
+      function getAllTags() {
+        return [...new Set(state.links.flatMap((link) => link.tags))].sort(
+          (a, b) => a.localeCompare(b),
+        );
+      }
+
+      function renderTagSelect() {
+        els.selectedTags.replaceChildren(
+          ...state.formTags.map((tag) => {
+            const token = document.createElement("span");
+            token.className = "tag-token";
+            token.textContent = tag;
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "tag-remove";
+            remove.textContent = "x";
+            remove.setAttribute("aria-label", `${tag} を削除`);
+            remove.addEventListener("click", () => removeFormTag(tag));
+
+            token.append(remove);
+            return token;
+          }),
+        );
+
+        const query = els.tagsInput.value.trim().toLowerCase();
+        const candidates = getAllTags()
+          .filter((tag) => !state.formTags.includes(tag))
+          .filter((tag) => !query || tag.includes(query));
+
+        els.tagMenu.replaceChildren();
+        candidates.forEach((tag) => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.className = "tag-option";
+          option.textContent = tag;
+          option.dataset.value = tag;
+          option.addEventListener("mousedown", (event) =>
+            event.preventDefault(),
+          );
+          option.addEventListener("click", () => addFormTag(tag));
+          els.tagMenu.append(option);
+        });
+
+        if (
+          query &&
+          !state.formTags.includes(query) &&
+          !candidates.includes(query)
+        ) {
+          const create = document.createElement("button");
+          create.type = "button";
+          create.className = "tag-option";
+          create.textContent = `Create "${query}"`;
+          create.dataset.value = query;
+          create.addEventListener("mousedown", (event) =>
+            event.preventDefault(),
+          );
+          create.addEventListener("click", () => addFormTag(query));
+          els.tagMenu.prepend(create);
+        }
+
+        const options = getTagOptions();
+        if (state.tagActiveIndex >= options.length)
+          state.tagActiveIndex = Math.max(options.length - 1, 0);
+        options.forEach((option, index) => {
+          option.classList.toggle("active", index === state.tagActiveIndex);
+          option.setAttribute(
+            "aria-selected",
+            String(index === state.tagActiveIndex),
+          );
+        });
+
+        els.tagMenu.classList.toggle(
+          "open",
+          state.tagMenuOpen && els.tagMenu.children.length > 0,
+        );
+      }
+
+      function getTagOptions() {
+        return [...els.tagMenu.querySelectorAll(".tag-option")];
+      }
+
+      function moveTagActive(delta) {
+        state.tagMenuOpen = true;
+        renderTagSelect();
+        const options = getTagOptions();
+        if (!options.length) return;
+        state.tagActiveIndex =
+          (state.tagActiveIndex + delta + options.length) % options.length;
+        renderTagSelect();
+        getTagOptions()[state.tagActiveIndex]?.scrollIntoView({
+          block: "nearest",
+        });
+      }
+
+      function selectActiveTag() {
+        const active = getTagOptions()[state.tagActiveIndex];
+        if (state.tagMenuOpen && active?.dataset.value) {
+          addFormTag(active.dataset.value);
+          return true;
+        }
+        return false;
+      }
+
+      function addFormTag(value, shouldFocus = true) {
+        const nextTags = normalizeTags(value);
+        if (!nextTags.length) return;
+        state.formTags = [...new Set([...state.formTags, ...nextTags])];
+        els.tagsInput.value = "";
+        state.tagMenuOpen = true;
+        state.tagActiveIndex = 0;
+        renderTagSelect();
+        if (shouldFocus) els.tagsInput.focus();
+      }
+
+      function removeFormTag(tag) {
+        state.formTags = state.formTags.filter((item) => item !== tag);
+        renderTagSelect();
+        els.tagsInput.focus();
+      }
+
+      function renderGroups() {
+        const groups = new Set(state.groups);
+        state.links.forEach((link) => groups.add(cleanGroup(link.group)));
+        state.groups = getUniqueGroups([...groups]);
+        renderGroupSelect();
+      }
+
+      function renderGroupSelect() {
+        const query = state.groupFilter.trim().toLowerCase();
+        const candidates = state.groups.filter(
+          (group) => !query || group.toLowerCase().includes(query),
+        );
+        els.groupMenu.replaceChildren();
+
+        candidates.forEach((group) => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.className = "group-option";
+          option.textContent = group;
+          option.dataset.value = group;
+          option.addEventListener("mousedown", (event) =>
+            event.preventDefault(),
+          );
+          option.addEventListener("click", () => selectGroup(group));
+          els.groupMenu.append(option);
+        });
+
+        const exactMatch = state.groups.some(
+          (group) => group.toLowerCase() === query,
+        );
+        if (query && !exactMatch) {
+          const newGroup = state.groupFilter.trim();
+          const create = document.createElement("button");
+          create.type = "button";
+          create.className = "group-option";
+          create.textContent = `Create "${newGroup}"`;
+          create.dataset.value = newGroup;
+          create.addEventListener("mousedown", (event) =>
+            event.preventDefault(),
+          );
+          create.addEventListener("click", () => selectGroup(newGroup));
+          els.groupMenu.prepend(create);
+        }
+
+        const options = getGroupOptions();
+        if (state.groupActiveIndex >= options.length)
+          state.groupActiveIndex = Math.max(options.length - 1, 0);
+        options.forEach((option, index) => {
+          option.classList.toggle("active", index === state.groupActiveIndex);
+          option.setAttribute(
+            "aria-selected",
+            String(index === state.groupActiveIndex),
+          );
+        });
+
+        els.groupMenu.classList.toggle(
+          "open",
+          state.groupMenuOpen && els.groupMenu.children.length > 0,
+        );
+      }
+
+      function getGroupOptions() {
+        return [...els.groupMenu.querySelectorAll(".group-option")];
+      }
+
+      function moveGroupActive(delta) {
+        state.groupMenuOpen = true;
+        renderGroupSelect();
+        const options = getGroupOptions();
+        if (!options.length) return;
+        state.groupActiveIndex =
+          (state.groupActiveIndex + delta + options.length) % options.length;
+        renderGroupSelect();
+        getGroupOptions()[state.groupActiveIndex]?.scrollIntoView({
+          block: "nearest",
+        });
+      }
+
+      function selectActiveGroup() {
+        const active = getGroupOptions()[state.groupActiveIndex];
+        if (state.groupMenuOpen && active?.dataset.value) {
+          selectGroup(active.dataset.value);
+          return true;
+        }
+        return false;
+      }
+
+      function selectGroup(value, shouldFocus = true) {
+        const group = cleanGroup(value);
+        els.groupInput.value = group;
+        state.groupMenuOpen = false;
+        state.groupActiveIndex = 0;
+        state.groupFilter = "";
+        renderGroupSelect();
+        if (shouldFocus) els.groupInput.focus();
+      }
+
+      function renderGroupList() {
+        els.groupList.replaceChildren();
+        const usage = new Map();
+        state.links.forEach((link) => {
+          const group = cleanGroup(link.group);
+          usage.set(group, (usage.get(group) || 0) + 1);
+        });
+
+        state.groups.forEach((group) => {
+          const item = document.createElement("div");
+          item.className = "group-item";
+
+          let name;
+          if (state.editingGroup === group) {
+            name = document.createElement("input");
+            name.className = "group-edit-input";
+            name.value = group;
+            name.addEventListener("keydown", (event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commitGroupRename(group, name.value);
+              }
+              if (event.key === "Escape") {
+                event.preventDefault();
+                cancelGroupRename();
+              }
+            });
+            name.addEventListener("blur", () =>
+              commitGroupRename(group, name.value),
+            );
+            requestAnimationFrame(() => {
+              name.focus();
+              name.select();
+            });
+          } else {
+            name = document.createElement("button");
+            name.type = "button";
+            name.className = "group-name";
+            name.disabled = group === NO_GROUP;
+            name.title = name.disabled
+              ? "no groupは改名できません"
+              : "クリックしてグループ名を編集";
+            name.textContent = group;
+            name.addEventListener("click", () => startGroupRename(group));
+
+            const meta = document.createElement("span");
+            meta.className = "group-meta";
+            meta.textContent = `${usage.get(group) || 0}`;
+            name.append(meta);
+          }
+
+          const actions = document.createElement("div");
+          actions.className = "group-actions";
+
+          const remove = smallButton(
+            "Delete",
+            () => deleteGroup(group),
+            "danger",
+          );
+          remove.disabled = group === NO_GROUP || (usage.get(group) || 0) > 0;
+          remove.title = remove.disabled
+            ? "使用中のグループは削除できません"
+            : "グループ候補から削除";
+          actions.append(remove);
+
+          item.append(name, actions);
+          els.groupList.append(item);
+        });
+      }
+
+      function renderBoard(links) {
+        els.boardView.replaceChildren();
+        if (!links.length) {
+          els.boardView.append(emptyState());
+          return;
+        }
+
+        const grouped = groupBy(links, (link) => cleanGroup(link.group));
+        const orderedGroups = [
+          ...state.groups,
+          ...Object.keys(grouped)
+            .filter((group) => !state.groups.includes(group))
+            .sort((a, b) => a.localeCompare(b, "ja")),
+        ];
+        const pinnedLinks = links.filter((link) => link.pinned);
+        const favorites = renderFavorites(pinnedLinks);
+        if (favorites) els.boardView.append(favorites);
+
+        const board = document.createElement("div");
+        board.className = "board";
+
+        orderedGroups.forEach((group) => {
+          const groupLinks = grouped[group];
+          if (!groupLinks || !groupLinks.length) return;
+          appendBoardSection(board, group, groupLinks);
+        });
+
+        els.boardView.append(board);
+      }
+
+      function renderFavorites(pinnedLinks) {
+        if (!pinnedLinks.length) return null;
+
+        const section = document.createElement("section");
+        section.className = "favorites-section";
+        section.setAttribute("aria-labelledby", "favoritesTitle");
+
+        const head = document.createElement("div");
+        head.className = "favorites-head";
+
+        const titleWrap = document.createElement("div");
+        titleWrap.className = "favorites-title-wrap";
+
+        const icon = document.createElement("span");
+        icon.className = "favorites-icon";
+        icon.innerHTML =
+          '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M9.6 1.8 14.2 6.4 12.7 7.9 11.4 7.4 8.9 9.9 9.1 12.3 8.4 13 5.4 10 2.2 13.2 1.6 12.6 4.8 9.4 1.8 6.4 2.5 5.7 4.9 5.9 7.4 3.4 6.9 2.1 8.4.6 9.6 1.8Z" fill="currentColor"/></svg>';
+
+        const title = document.createElement("h2");
+        title.className = "favorites-title";
+        title.id = "favoritesTitle";
+        title.textContent = "Pinned";
+
+        titleWrap.append(icon, title);
+
+        const count = document.createElement("span");
+        count.className = "count";
+        count.textContent = `${pinnedLinks.length} ${pinnedLinks.length === 1 ? "link" : "links"}`;
+
+        head.append(titleWrap, count);
+
+        const grid = document.createElement("div");
+        grid.className = "link-grid";
+        pinnedLinks.forEach((link) => {
+          grid.append(createBoardLinkButton(link));
+        });
+
+        section.append(head, grid);
+        return section;
+      }
+
+      function appendBoardSection(board, group, groupLinks) {
+        if (!groupLinks.length) return;
+        const isCollapsed = state.collapsedGroups.includes(group);
+        const section = document.createElement("section");
+        section.className = "group-section";
+        section.classList.toggle("collapsed", isCollapsed);
+
+        const head = document.createElement("div");
+        head.className = "group-head";
+        const titleArea = document.createElement("div");
+        titleArea.className = "group-title-area";
+        const titleWrap = document.createElement("button");
+        titleWrap.type = "button";
+        titleWrap.className = "group-title-wrap";
+        titleWrap.setAttribute("aria-expanded", String(!isCollapsed));
+        titleWrap.setAttribute(
+          "aria-label",
+          `${group} を${isCollapsed ? "展開" : "折りたたみ"}`,
+        );
+        titleWrap.addEventListener("click", () => toggleGroup(group));
+        const toggle = document.createElement("span");
+        toggle.className = "group-toggle";
+        toggle.innerHTML =
+          '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 6 8 9.5 11.5 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        const title = document.createElement("h2");
+        title.className = "group-title";
+        title.textContent = group;
+        titleWrap.append(toggle, title);
+        titleArea.append(titleWrap);
+        const add = document.createElement("button");
+        add.type = "button";
+        add.className = "group-add";
+        add.textContent = "+";
+        add.setAttribute("aria-label", `${group} にリンクを追加`);
+        add.title = `${group} にリンクを追加`;
+        add.addEventListener("click", () => openModal(null, { group }));
+        titleArea.append(add);
+        const count = document.createElement("span");
+        count.className = "count";
+        count.textContent = `${groupLinks.length} ${groupLinks.length === 1 ? "link" : "links"}`;
+        head.append(titleArea, count);
+
+        const grid = document.createElement("div");
+        grid.className = "link-grid";
+        grid.hidden = isCollapsed;
+        groupLinks.forEach((link) => {
+          grid.append(createBoardLinkButton(link));
+        });
+
+        section.append(head, grid);
+        board.append(section);
+      }
+
+      function createBoardLinkButton(link) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "link-button";
+        button.title = `${link.title}\n${link.url}`;
+
+        const content = document.createElement("span");
+        content.className = "board-link-content";
+
+        const title = document.createElement("span");
+        title.className = "board-link-title";
+        appendHighlighted(title, link.title);
+        content.append(title);
+
+        button.append(content);
+        button.addEventListener("click", () => openLink(link));
+        return button;
+      }
+
+      function toggleGroup(group) {
+        if (state.collapsedGroups.includes(group)) {
+          state.collapsedGroups = state.collapsedGroups.filter(
+            (item) => item !== group,
+          );
+        } else {
+          state.collapsedGroups = [...state.collapsedGroups, group];
+        }
+        persist();
+        render();
+      }
+
+      function renderList(links) {
+        els.listView.replaceChildren();
+        if (!links.length) {
+          els.listView.append(emptyState());
+          return;
+        }
+
+        const list = document.createElement("div");
+        list.className = "list";
+        const head = document.createElement("div");
+        head.className = "list-head";
+        ["Title", "URL", "Group", "Tags", "Actions"].forEach((label) => {
+          const cell = document.createElement("div");
+          cell.textContent = label;
+          head.append(cell);
+        });
+        list.append(head);
+        links.forEach((link) => {
+          const row = document.createElement("article");
+          row.className = "row";
+
+          const title = document.createElement("div");
+          title.className = "row-title";
+          const titleText = document.createElement("button");
+          titleText.type = "button";
+          titleText.className = "row-title-button";
+          appendHighlighted(titleText, link.title);
+          titleText.title = `${link.title}\nOpen link`;
+          titleText.addEventListener("click", () => openLink(link));
+          title.append(titleText);
+
+          const url = document.createElement("button");
+          url.type = "button";
+          url.className = "row-url";
+          url.classList.toggle("copied", state.copiedLinkId === link.id);
+          url.textContent =
+            state.copiedLinkId === link.id ? "Copied" : link.url;
+          url.title = `${link.url}\nClick to copy`;
+          url.addEventListener("click", () => copyUrl(link.url, link.id));
+
+          const group = document.createElement("div");
+          group.className = "row-group";
+          group.textContent = cleanGroup(link.group);
+
+          const tags = document.createElement("div");
+          tags.className = "row-tags";
+          tags.title = link.tags.length ? link.tags.join(", ") : "no tags";
+          if (link.tags.length) {
+            link.tags.forEach((tag) => {
+              const span = document.createElement("span");
+              span.className = "mini-tag";
+              span.textContent = tag;
+              tags.append(span);
+            });
+          } else {
+            const span = document.createElement("span");
+            span.className = "mini-tag";
+            span.textContent = "no tags";
+            tags.append(span);
+          }
+
+          const actions = document.createElement("div");
+          actions.className = "row-actions";
+          actions.append(
+            pinToggleButton(link),
+            smallButton("Edit", () => openModal(link)),
+            smallButton("Delete", () => deleteLink(link.id), "danger"),
+          );
+
+          row.append(title, url, group, tags, actions);
+          list.append(row);
+        });
+        els.listView.append(list);
+      }
+
+      function pinToggleButton(link) {
+        const button = smallButton(
+          link.pinned ? "Pinned" : "Pin",
+          () => togglePin(link.id),
+          `pin-action${link.pinned ? " active" : ""}`,
+        );
+        button.title = link.pinned ? "Pinnedから外す" : "Pinnedに追加";
+        button.setAttribute("aria-pressed", String(link.pinned));
+        return button;
+      }
+
+      function smallButton(label, action, variant = "") {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `button ${variant}`.trim();
+        button.textContent = label;
+        button.addEventListener("click", action);
+        return button;
+      }
+
+      function emptyState() {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        const title = document.createElement("div");
+        title.className = "empty-title";
+        title.textContent = "該当するリンクがありません。";
+        empty.append(title);
+
+        const conditions = [];
+        if (state.query.trim()) conditions.push(`検索: ${state.query.trim()}`);
+        if (state.tag !== "all") conditions.push(`タグ: ${state.tag}`);
+        if (conditions.length) {
+          const detail = document.createElement("div");
+          detail.className = "empty-detail";
+          detail.textContent = conditions.join(" / ");
+          empty.append(detail);
+        }
+        return empty;
+      }
+
+      function groupBy(items, getter) {
+        return items.reduce((result, item) => {
+          const key = getter(item);
+          result[key] ||= [];
+          result[key].push(item);
+          return result;
+        }, {});
+      }
+
+      function updateView() {
+        const isBoard = state.view === "board";
+        els.boardTab.setAttribute("aria-pressed", String(isBoard));
+        els.listTab.setAttribute("aria-pressed", String(!isBoard));
+        els.boardView.classList.toggle("active", isBoard);
+        els.listView.classList.toggle("active", !isBoard);
+      }
+
+      function togglePin(id) {
+        state.links = state.links.map((link) =>
+          link.id === id
+            ? { ...link, pinned: !link.pinned, updatedAt: Date.now() }
+            : link,
+        );
+        persist();
+        render();
+      }
+
+      function openLink(linkOrUrl) {
+        const url = typeof linkOrUrl === "string" ? linkOrUrl : linkOrUrl.url;
+        window.open(normalizeUrl(url), "_blank", "noopener");
+        if (typeof linkOrUrl !== "string") {
+          state.links = state.links.map((link) =>
+            link.id === linkOrUrl.id
+              ? { ...link, lastOpenedAt: Date.now() }
+              : link,
+          );
+          persist();
+          render();
+        }
+      }
+
+      let copyFeedbackTimer;
+
+      async function copyUrl(url, linkId = null) {
+        const normalizedUrl = normalizeUrl(url);
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(normalizedUrl);
+          } else {
+            copyTextFallback(normalizedUrl);
+          }
+          showCopyFeedback(linkId);
+          showToast("URLをコピーしました");
+        } catch {
+          copyTextFallback(normalizedUrl);
+          showCopyFeedback(linkId);
+          showToast("URLをコピーしました");
+        }
+      }
+
+      function showCopyFeedback(linkId) {
+        if (!linkId) return;
+        state.copiedLinkId = linkId;
+        clearTimeout(copyFeedbackTimer);
+        render();
+        copyFeedbackTimer = setTimeout(() => {
+          if (state.copiedLinkId !== linkId) return;
+          state.copiedLinkId = null;
+          render();
+        }, 1200);
+      }
+
+      function copyTextFallback(text) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+        document.body.append(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+      }
+
+      const appEl = document.querySelector(".app");
+      let lastFocusedBeforeModal = null;
+
+      function isAnyModalOpen() {
+        return document.querySelector(".modal.open") !== null;
+      }
+
+      function getFocusable(container) {
+        const selector =
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        return [...container.querySelectorAll(selector)].filter(
+          (el) => el.offsetParent !== null || el === document.activeElement,
+        );
+      }
+
+      function trapFocus(event, modal) {
+        if (event.key !== "Tab" || event.defaultPrevented) return;
+        const focusables = getFocusable(modal);
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+
+      function onModalOpen() {
+        if (!isAnyModalOpen()) lastFocusedBeforeModal = document.activeElement;
+        appEl.inert = true;
+        appEl.setAttribute("aria-hidden", "true");
+      }
+
+      function onModalClose() {
+        if (isAnyModalOpen()) return;
+        appEl.inert = false;
+        appEl.removeAttribute("aria-hidden");
+        if (
+          lastFocusedBeforeModal &&
+          document.contains(lastFocusedBeforeModal)
+        ) {
+          lastFocusedBeforeModal.focus();
+        }
+        lastFocusedBeforeModal = null;
+      }
+
+      function resetLinkForm() {
+        els.linkForm.reset();
+        state.editingId = null;
+        state.autoTitleValue = "";
+        state.formTags = [];
+        state.formLoadedFor = null;
+        els.tagsInput.value = "";
+      }
+
+      function openModal(link = null, defaults = {}) {
+        onModalOpen();
+        // 下書きの保持はヘッダーの「+ New」だけ（link なし・グループ指定なし）。
+        // Board のグループ「+」と Edit は常に対象内容で読み込み直す。
+        const draftKey = !link && defaults.group == null ? "__new__" : null;
+        const keepDraft = draftKey !== null && state.formLoadedFor === draftKey;
+
+        els.modalTitle.textContent = link ? "Edit link" : "New link";
+
+        if (!keepDraft) {
+          state.editingId = link?.id || null;
+          state.autoTitleValue = "";
+          els.urlInput.value = link?.url || "";
+          els.titleInput.value = link?.title || "";
+          els.groupInput.value = cleanGroup(
+            link?.group || defaults.group || NO_GROUP,
+          );
+          state.formTags = [...(link?.tags || [])];
+          els.noteInput.value = link?.note || "";
+          state.formLoadedFor = draftKey;
+        }
+
+        renderGroups();
+        state.groupMenuOpen = false;
+        state.groupActiveIndex = 0;
+        state.groupFilter = "";
+        renderGroupSelect();
+        els.tagsInput.value = "";
+        state.tagMenuOpen = false;
+        state.tagActiveIndex = 0;
+        renderTagSelect();
+        els.modal.classList.add("open");
+        setTimeout(() => (link ? els.titleInput : els.urlInput).focus(), 0);
+      }
+
+      // 閉じても入力値は保持する（破棄は Save 成功時のみ）。ここでは表示を隠して
+      // ドロップダウンの一時状態だけ畳む。
+      function closeModal() {
+        els.modal.classList.remove("open");
+        state.groupMenuOpen = false;
+        state.groupActiveIndex = 0;
+        state.groupFilter = "";
+        state.tagMenuOpen = false;
+        state.tagActiveIndex = 0;
+        renderGroupSelect();
+        renderTagSelect();
+        onModalClose();
+      }
+
+      function openGroupsModal() {
+        onModalOpen();
+        renderGroupList();
+        els.groupsModal.classList.add("open");
+        setTimeout(() => els.newGroupInput.focus(), 0);
+      }
+
+      function closeGroupsModal() {
+        els.groupsModal.classList.remove("open");
+        els.groupForm.reset();
+        onModalClose();
+      }
+
+      function saveForm(event) {
+        event.preventDefault();
+        addFormTag(els.tagsInput.value, false);
+        selectGroup(els.groupInput.value, false);
+        const now = Date.now();
+        const data = {
+          title: els.titleInput.value.trim(),
+          url: normalizeUrl(els.urlInput.value),
+          group: cleanGroup(els.groupInput.value),
+          tags: state.formTags,
+          note: els.noteInput.value.trim(),
+        };
+
+        if (!data.title || !data.url) {
+          showToast("Title と URL は必須です");
+          return;
+        }
+
+        const duplicate = state.links.find(
+          (link) => link.url === data.url && link.id !== state.editingId,
+        );
+        if (
+          duplicate &&
+          !confirm(
+            `同じURLのリンク「${duplicate.title}」が既にあります。保存しますか？`,
+          )
+        ) {
+          return;
+        }
+
+        if (state.editingId) {
+          state.links = state.links.map((link) =>
+            link.id === state.editingId
+              ? { ...link, ...data, updatedAt: now }
+              : link,
+          );
+          showToast("リンクを更新しました");
+        } else {
+          state.links = [
+            { id: uid(), ...data, createdAt: now },
+            ...state.links,
+          ];
+          showToast("リンクを追加しました");
+        }
+
+        state.groups = getUniqueGroups([...state.groups, data.group]);
+        persist();
+        closeModal();
+        resetLinkForm();
+        render();
+      }
+
+      function saveGroup(event) {
+        event.preventDefault();
+        const group = cleanGroup(els.newGroupInput.value);
+        if (!group) return;
+        if (state.groups.includes(group)) {
+          showToast("同じグループが既にあります");
+          return;
+        }
+        state.groups = getUniqueGroups([...state.groups, group]);
+        els.groupForm.reset();
+        persist();
+        closeGroupsModal();
+        render();
+        showToast("グループを追加しました");
+        openModal(null, { group });
+      }
+
+      function startGroupRename(group) {
+        if (group === NO_GROUP) {
+          showToast("no groupは改名できません");
+          return;
+        }
+        state.editingGroup = group;
+        renderGroupList();
+      }
+
+      function cancelGroupRename() {
+        state.editingGroup = null;
+        renderGroupList();
+      }
+
+      function commitGroupRename(group, value) {
+        if (state.editingGroup !== group) return;
+
+        const next = cleanGroup(value);
+        if (!next || next === group) {
+          cancelGroupRename();
+          return;
+        }
+
+        if (state.groups.includes(next)) {
+          showToast("同じグループが既にあります");
+          cancelGroupRename();
+          return;
+        }
+
+        state.groups = getUniqueGroups(
+          state.groups.map((item) => (item === group ? next : item)),
+        );
+        state.links = state.links.map((link) =>
+          cleanGroup(link.group) === group
+            ? { ...link, group: next, updatedAt: Date.now() }
+            : link,
+        );
+        state.collapsedGroups = state.collapsedGroups.map((item) =>
+          item === group ? next : item,
+        );
+        state.editingGroup = null;
+        persist();
+        render();
+        showToast("グループ名を変更しました");
+      }
+
+      function deleteGroup(group) {
+        const used = state.links.some(
+          (link) => cleanGroup(link.group) === group,
+        );
+        if (group === NO_GROUP || used) {
+          showToast("使用中のグループは削除できません");
+          return;
+        }
+        state.groups = state.groups.filter((item) => item !== group);
+        persist();
+        render();
+        showToast("グループを削除しました");
+      }
+
+      function deleteLink(id) {
+        const link = state.links.find((item) => item.id === id);
+        if (!link) return;
+        if (!confirm(`「${link.title}」を削除しますか？`)) return;
+        state.links = state.links.filter((item) => item.id !== id);
+        persist();
+        render();
+        showToast("リンクを削除しました");
+      }
+
+      function exportData() {
+        const payload = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          groups: state.groups,
+          links: state.links,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `link-index-${new Date().toISOString().slice(0, 10)}.json`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function importData(file) {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          try {
+            const parsed = JSON.parse(String(reader.result || "{}"));
+            const rawLinks = Array.isArray(parsed)
+              ? parsed
+              : Array.isArray(parsed?.links)
+                ? parsed.links
+                : Array.isArray(parsed?.data?.links)
+                  ? parsed.data.links
+                  : [];
+            const rawGroups = Array.isArray(parsed?.groups)
+              ? parsed.groups
+              : Array.isArray(parsed?.data?.groups)
+                ? parsed.data.groups
+                : [];
+            const imported = rawLinks
+              .map(normalizeLink)
+              .filter((link) => link.title && link.url);
+            if (!imported.length) {
+              showToast("読み込めるリンクがありません");
+              return;
+            }
+            const existingUrls = new Set(state.links.map((link) => link.url));
+            const duplicateCount = imported.filter((link) =>
+              existingUrls.has(link.url),
+            ).length;
+            state.pendingImport = { groups: rawGroups, links: imported };
+            els.importSummary.innerHTML = `
+            <div><strong>${imported.length}</strong> links found.</div>
+            <div><strong>${duplicateCount}</strong> duplicate URLs will be skipped on merge.</div>
+            <div>Merge keeps current data. Replace clears current links first.</div>
+          `;
+            onModalOpen();
+            els.importModal.classList.add("open");
+          } catch {
+            showToast("JSONの読み込みに失敗しました");
+          }
+        });
+        reader.readAsText(file);
+      }
+
+      function applyImport(mode) {
+        if (!state.pendingImport) return;
+        const imported = state.pendingImport.links;
+        const importedGroups = state.pendingImport.groups;
+        if (mode === "replace") {
+          state.links = imported;
+          state.groups = getUniqueGroups([
+            ...DEFAULT_GROUPS,
+            ...importedGroups,
+            ...imported.map((link) => link.group),
+          ]);
+        } else {
+          const existingUrls = new Set(state.links.map((link) => link.url));
+          state.links = [
+            ...state.links,
+            ...imported.filter((link) => !existingUrls.has(link.url)),
+          ];
+          state.groups = getUniqueGroups([
+            ...state.groups,
+            ...importedGroups,
+            ...imported.map((link) => link.group),
+          ]);
+        }
+        state.pendingImport = null;
+        els.importModal.classList.remove("open");
+        onModalClose();
+        persist();
+        render();
+        showToast(
+          mode === "replace"
+            ? "データを置換しました"
+            : "データをマージしました",
+        );
+      }
+
+      function closeImportModal() {
+        state.pendingImport = null;
+        els.importModal.classList.remove("open");
+        onModalClose();
+      }
+
+      function openDataModal() {
+        onModalOpen();
+        renderStorageUsage();
+        els.dataModal.classList.add("open");
+      }
+
+      function closeDataModal() {
+        els.dataModal.classList.remove("open");
+        onModalClose();
+      }
+
+      function toggleSettingsMenu() {
+        state.settingsOpen = !state.settingsOpen;
+        renderSettingsMenu();
+      }
+
+      function closeSettingsMenu() {
+        if (!state.settingsOpen) return;
+        state.settingsOpen = false;
+        renderSettingsMenu();
+      }
+
+      function renderSettingsMenu() {
+        els.settingsMenu.classList.toggle("open", state.settingsOpen);
+        els.settingsButton.setAttribute(
+          "aria-expanded",
+          String(state.settingsOpen),
+        );
+      }
+
+      function renderStorageUsage() {
+        const value = localStorage.getItem(STORAGE_KEY) || "";
+        const bytes = new Blob([value]).size;
+        els.storageUsage.textContent = `Storage: ${formatBytes(bytes)} / localStorage`;
+      }
+
+      function formatBytes(bytes) {
+        if (bytes < 1024) return `${bytes} B`;
+        const kb = bytes / 1024;
+        if (kb < 1024) return `${kb.toFixed(kb < 10 ? 1 : 0)} KB`;
+        const mb = kb / 1024;
+        return `${mb.toFixed(mb < 10 ? 1 : 0)} MB`;
+      }
+
+      function clearData() {
+        if (!confirm("すべてのリンクを削除しますか？")) return;
+        state.links = [];
+        state.groups = [...DEFAULT_GROUPS];
+        state.collapsedGroups = [];
+        persist();
+        closeDataModal();
+        render();
+        showToast("データを削除しました");
+      }
+
+      function restoreSamples() {
+        if (
+          !confirm("サンプルデータに戻しますか？現在のリンクは置き換わります。")
+        )
+          return;
+        state.links = sampleLinks.map(normalizeLink);
+        state.groups = getUniqueGroups([
+          ...DEFAULT_GROUPS,
+          ...state.links.map((link) => link.group),
+        ]);
+        state.collapsedGroups = [];
+        persist();
+        closeDataModal();
+        render();
+        showToast("サンプルを復元しました");
+      }
+
+      function handleUrlInput() {
+        if (!els.urlInput.value.trim()) {
+          clearAutoTitle();
+          return;
+        }
+        if (
+          els.titleInput.value.trim() &&
+          els.titleInput.value.trim() !== state.autoTitleValue
+        )
+          return;
+        const title = inferTitleFromUrl(els.urlInput.value);
+        if (title) setAutoTitle(title);
+      }
+
+      function handleUrlPaste(event) {
+        if (
+          els.titleInput.value.trim() &&
+          els.titleInput.value.trim() !== state.autoTitleValue
+        )
+          return;
+        const clipboard = event.clipboardData;
+        const html = clipboard?.getData("text/html") || "";
+        const text = clipboard?.getData("text/plain") || "";
+        const parsed = parseHtmlLink(html);
+        if (parsed?.url) {
+          event.preventDefault();
+          els.urlInput.value = parsed.url;
+          setAutoTitle(parsed.title || inferTitleFromUrl(parsed.url));
+          return;
+        }
+        const title = inferTitleFromUrl(text);
+        if (title) {
+          setTimeout(() => {
+            if (
+              !els.titleInput.value.trim() ||
+              els.titleInput.value.trim() === state.autoTitleValue
+            )
+              setAutoTitle(title);
+          }, 0);
+        }
+      }
+
+      function setAutoTitle(title) {
+        const normalizedTitle = String(title || "").trim();
+        if (!normalizedTitle) return;
+        els.titleInput.value = normalizedTitle;
+        state.autoTitleValue = normalizedTitle;
+      }
+
+      function clearAutoTitle() {
+        if (els.titleInput.value.trim() === state.autoTitleValue) {
+          els.titleInput.value = "";
+        }
+        state.autoTitleValue = "";
+      }
+
+      function parseHtmlLink(html) {
+        if (!html.trim()) return null;
+        const template = document.createElement("template");
+        template.innerHTML = html;
+        const anchor = template.content.querySelector("a[href]");
+        if (!anchor) return null;
+        return {
+          url: anchor.href,
+          title: anchor.textContent.trim(),
+        };
+      }
+
+      // SharePoint の定型ページ名など、title として無意味なパスセグメント。
+      const TITLE_NOISE_SEGMENTS = new Set([
+        "forms",
+        "allitems.aspx",
+        "doc.aspx",
+        "wopiframe.aspx",
+        "default.aspx",
+        "home.aspx",
+        "start.aspx",
+        "_layouts",
+        "15",
+      ]);
+
+      // ファイル名末尾から落とす拡張子（Office / PDF / SharePoint ページ等）。
+      const TITLE_EXTENSION_RE =
+        /\.(docx?|docm|xlsx?|xlsm|pptx?|pptm|pdf|one|vsdx?|csv|txt|rtf|msg|aspx|html?|od[tsp])$/i;
+
+      function inferTitleFromUrl(value) {
+        const raw = String(value || "").trim();
+        if (!raw) return "";
+
+        let url;
+        try {
+          url = new URL(normalizeUrl(raw));
+        } catch {
+          return "";
+        }
+
+        const params = url.searchParams;
+        const candidates = [
+          params.get("file"),
+          params.get("id"),
+          params.get("RootFolder"),
+          params.get("sourcedoc"),
+          url.pathname,
+        ].filter(Boolean);
+
+        for (const candidate of candidates) {
+          const slug = lastMeaningfulSegment(candidate);
+          if (isMeaninglessSlug(slug)) continue;
+          return prettifyTitle(slug);
+        }
+
+        return prettifyTitle(url.hostname.replace(/^www\./, ""));
+      }
+
+      // パス/クエリ値から、表示に使える最後のセグメント(ファイル名・フォルダ名)を取り出す。
+      // SharePoint の Forms/AllItems.aspx のような定型セグメントは飛ばし、拡張子は落とす。
+      function lastMeaningfulSegment(value) {
+        const path = String(value || "").split("?")[0].split("#")[0];
+        const segments = path
+          .split("/")
+          .map(safeDecode)
+          .map((segment) => segment.trim())
+          .filter(Boolean)
+          .filter((segment) => !TITLE_NOISE_SEGMENTS.has(segment.toLowerCase()));
+        const last = segments.pop() || "";
+        return last.replace(TITLE_EXTENSION_RE, "");
+      }
+
+      function safeDecode(value) {
+        try {
+          return decodeURIComponent(value);
+        } catch {
+          return value;
+        }
+      }
+
+      // 画面に出して意味をなさないスラッグ(GUID / ハッシュ / Drive・共有リンクの不透明 ID)を弾く。
+      // 区切り正規化の前に生スラッグで判定するため、GUID の "-" がそのまま残っている。
+      function isMeaninglessSlug(slug) {
+        const value = String(slug || "").trim();
+        if (!value) return true;
+        if (
+          /^\{?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}?$/i.test(
+            value,
+          )
+        )
+          return true;
+        if (/^[0-9a-f]{24,}$/i.test(value)) return true;
+        if (looksLikeOpaqueId(value)) return true;
+        return false;
+      }
+
+      // drive.google.com のフォルダ ID や SharePoint 共有リンクのトークンのような、
+      // 区切りのない長い英数字ランダム列を「不透明 ID」とみなす。
+      // 実ファイル名の誤検出を避けるため、長さ・数字・大小混在・母音比で厳しめに判定する。
+      function looksLikeOpaqueId(value) {
+        const text = String(value || "");
+        if (text.length < 24) return false;
+        if (/[\s　]/.test(text)) return false;
+        if (!/^[A-Za-z0-9_-]+$/.test(text)) return false;
+        if (!/[0-9]/.test(text)) return false;
+        if (!(/[a-z]/.test(text) && /[A-Z]/.test(text))) return false;
+        const letters = text.replace(/[^A-Za-z]/g, "");
+        const vowels = (text.match(/[aeiou]/gi) || []).length;
+        return letters.length > 0 && vowels / letters.length < 0.3;
+      }
+
+      // スラッグを表示用に整形する(ハイフンは空白へ、アンダースコアは保持、連続空白を畳む)。
+      function prettifyTitle(slug) {
+        return String(slug || "")
+          .replace(/-+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function showToast(message) {
+        els.toast.textContent = message;
+        els.toast.classList.add("show");
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(
+          () => els.toast.classList.remove("show"),
+          2200,
+        );
+      }
+
+      els.boardTab.addEventListener("click", () => {
+        state.view = "board";
+        render();
+      });
+
+      els.listTab.addEventListener("click", () => {
+        state.view = "list";
+        render();
+      });
+
+      let searchDebounceTimer;
+      els.searchInput.addEventListener("input", (event) => {
+        state.query = event.target.value;
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(render, 110);
+      });
+
+      els.tagToggleButton.addEventListener("click", () => {
+        state.tagbarOpen = !state.tagbarOpen;
+        renderTags();
+      });
+
+      els.newButton.addEventListener("click", () => openModal());
+      els.groupsButton.addEventListener("click", openGroupsModal);
+      els.settingsButton.addEventListener("click", toggleSettingsMenu);
+      els.dataButton.addEventListener("click", () => {
+        closeSettingsMenu();
+        openDataModal();
+      });
+      els.closeModalButton.addEventListener("click", closeModal);
+      els.closeGroupsButton.addEventListener("click", closeGroupsModal);
+      els.closeImportButton.addEventListener("click", closeImportModal);
+      els.cancelImportButton.addEventListener("click", closeImportModal);
+      els.mergeImportButton.addEventListener("click", () =>
+        applyImport("merge"),
+      );
+      els.replaceImportButton.addEventListener("click", () =>
+        applyImport("replace"),
+      );
+      els.closeDataButton.addEventListener("click", closeDataModal);
+      els.clearDataButton.addEventListener("click", clearData);
+      els.restoreSamplesButton.addEventListener("click", restoreSamples);
+      els.cancelButton.addEventListener("click", closeModal);
+      els.linkForm.addEventListener("submit", saveForm);
+      els.groupForm.addEventListener("submit", saveGroup);
+      els.urlInput.addEventListener("input", handleUrlInput);
+      els.urlInput.addEventListener("paste", handleUrlPaste);
+      els.groupInput.addEventListener("focus", () => {
+        state.tagMenuOpen = false;
+        renderTagSelect();
+        state.groupMenuOpen = true;
+        state.groupActiveIndex = 0;
+        state.groupFilter = "";
+        renderGroupSelect();
+      });
+      els.groupSelect.addEventListener("click", () => {
+        state.groupMenuOpen = true;
+        state.groupActiveIndex = 0;
+        state.groupFilter = "";
+        renderGroupSelect();
+        els.groupInput.focus();
+      });
+      els.groupInput.addEventListener("input", () => {
+        state.groupMenuOpen = true;
+        state.groupActiveIndex = 0;
+        state.groupFilter = els.groupInput.value;
+        renderGroupSelect();
+      });
+      els.groupInput.addEventListener("keydown", (event) => {
+        if (event.key === "Tab") {
+          event.preventDefault();
+          selectGroup(els.groupInput.value, false);
+          state.groupMenuOpen = false;
+          renderGroupSelect();
+          if (event.shiftKey) {
+            els.titleInput.focus();
+          } else {
+            els.tagsInput.focus();
+          }
+          return;
+        }
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          moveGroupActive(1);
+          return;
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          moveGroupActive(-1);
+          return;
+        }
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          if (!selectActiveGroup()) selectGroup(els.groupInput.value);
+          return;
+        }
+
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          state.groupMenuOpen = false;
+          renderGroupSelect();
+        }
+      });
+      els.groupInput.addEventListener("blur", () => {
+        setTimeout(() => {
+          selectGroup(els.groupInput.value, false);
+          state.groupMenuOpen = false;
+          renderGroupSelect();
+        }, 120);
+      });
+      els.tagsInput.addEventListener("focus", () => {
+        state.groupMenuOpen = false;
+        renderGroupSelect();
+        state.tagMenuOpen = true;
+        state.tagActiveIndex = 0;
+        renderTagSelect();
+      });
+      document.querySelector("#tagSelect").addEventListener("click", () => {
+        state.groupMenuOpen = false;
+        renderGroupSelect();
+        state.tagMenuOpen = true;
+        state.tagActiveIndex = 0;
+        renderTagSelect();
+        els.tagsInput.focus();
+      });
+      els.tagsInput.addEventListener("input", () => {
+        state.tagMenuOpen = true;
+        state.tagActiveIndex = 0;
+        renderTagSelect();
+      });
+      els.tagsInput.addEventListener("keydown", (event) => {
+        if (event.key === "Tab") {
+          event.preventDefault();
+          addFormTag(els.tagsInput.value, false);
+          state.tagMenuOpen = false;
+          renderTagSelect();
+          if (event.shiftKey) {
+            els.groupInput.focus();
+          } else {
+            els.noteInput.focus();
+          }
+          return;
+        }
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          moveTagActive(1);
+          return;
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          moveTagActive(-1);
+          return;
+        }
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          if (!selectActiveTag()) addFormTag(els.tagsInput.value);
+          return;
+        }
+
+        if (event.key === ",") {
+          event.preventDefault();
+          addFormTag(els.tagsInput.value, false);
+          return;
+        }
+
+        if (
+          event.key === "Backspace" &&
+          !els.tagsInput.value &&
+          state.formTags.length
+        ) {
+          removeFormTag(state.formTags[state.formTags.length - 1]);
+        }
+
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          state.tagMenuOpen = false;
+          renderTagSelect();
+        }
+      });
+      els.tagsInput.addEventListener("blur", () => {
+        setTimeout(() => {
+          addFormTag(els.tagsInput.value);
+          state.tagMenuOpen = false;
+          renderTagSelect();
+        }, 120);
+      });
+      els.exportButton.addEventListener("click", () => {
+        closeSettingsMenu();
+        exportData();
+      });
+      els.importButton.addEventListener("click", () => {
+        closeSettingsMenu();
+        els.importFile.click();
+      });
+      els.importFile.addEventListener("change", (event) => {
+        const file = event.target.files?.[0];
+        if (file) importData(file);
+        event.target.value = "";
+      });
+
+      els.modal.addEventListener("click", (event) => {
+        if (event.target === els.modal) closeModal();
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!state.settingsOpen) return;
+        if (
+          els.settingsButton.contains(event.target) ||
+          els.settingsMenu.contains(event.target)
+        )
+          return;
+        closeSettingsMenu();
+      });
+
+      els.groupsModal.addEventListener("click", (event) => {
+        if (event.target === els.groupsModal) closeGroupsModal();
+      });
+
+      els.importModal.addEventListener("click", (event) => {
+        if (event.target === els.importModal) closeImportModal();
+      });
+
+      els.dataModal.addEventListener("click", (event) => {
+        if (event.target === els.dataModal) closeDataModal();
+      });
+
+      [els.modal, els.groupsModal, els.importModal, els.dataModal].forEach(
+        (modal) => {
+          modal.addEventListener("keydown", (event) => trapFocus(event, modal));
+        },
+      );
+
+      document.addEventListener("keydown", (event) => {
+        const activeTag = document.activeElement?.tagName;
+        const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(activeTag);
+
+        if (event.key === "Escape" && els.modal.classList.contains("open")) {
+          closeModal();
+          return;
+        }
+
+        if (
+          event.key === "Escape" &&
+          els.groupsModal.classList.contains("open")
+        ) {
+          closeGroupsModal();
+          return;
+        }
+
+        if (
+          event.key === "Escape" &&
+          els.importModal.classList.contains("open")
+        ) {
+          closeImportModal();
+          return;
+        }
+
+        if (
+          event.key === "Escape" &&
+          els.dataModal.classList.contains("open")
+        ) {
+          closeDataModal();
+          return;
+        }
+
+        if (event.key === "Escape" && state.settingsOpen) {
+          closeSettingsMenu();
+          els.settingsButton.focus();
+          return;
+        }
+
+        if (isTyping) return;
+        if (isAnyModalOpen()) return;
+
+        if (event.key === "/") {
+          event.preventDefault();
+          els.searchInput.focus();
+        }
+
+        if (event.key.toLowerCase() === "n") {
+          event.preventDefault();
+          openModal();
+        }
+      });
+
+      load();
+      render();
+    </script>
+  </body>
+</html>
