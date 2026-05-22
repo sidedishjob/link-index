@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Link Index の改修・拡張を行うエージェント / 開発者向けガイド。仕様の一次情報は [REQUIREMENTS.md](REQUIREMENTS.md)、利用者向け説明は [README.md](README.md) を参照。
+Link Index の改修・拡張を行うエージェント / 開発者向けガイド。仕様の一次情報は実装（`index.html`）そのもの。利用者向け説明は [README.md](README.md) を参照。
 
 ## このプロジェクトの本質
 
@@ -10,13 +10,12 @@ Link Index の改修・拡張を行うエージェント / 開発者向けガイ
 
 ## 構成ファイル
 
-| ファイル          | 役割                                                   |
-| ----------------- | ------------------------------------------------------ |
-| `index.html`      | アプリ本体（CSS は `<style>`、JS は末尾の `<script>`） |
-| `favicon.svg`     | ファビコン                                             |
-| `REQUIREMENTS.md` | 要件定義書（機能 ID `F-xx` の出典）                    |
-| `README.md`       | 利用者向けドキュメント                                 |
-| `CLAUDE.md`       | `AGENTS.md` へのシンボリックリンク                     |
+| ファイル      | 役割                                                   |
+| ------------- | ------------------------------------------------------ |
+| `index.html`  | アプリ本体（CSS は `<style>`、JS は末尾の `<script>`） |
+| `favicon.svg` | ファビコン                                             |
+| `README.md`   | 利用者向けドキュメント                                 |
+| `CLAUDE.md`   | `AGENTS.md` へのシンボリックリンク                     |
 
 ## 動かす / 確認する
 
@@ -31,7 +30,7 @@ python3 -m http.server 8000
 
 ## アーキテクチャ
 
-`<script>` 内は要件 §5.4 の通り 3 層に分かれている。新しいコードもこの分離を保つ。
+`<script>` 内は 3 層に分かれている。新しいコードもこの分離を保つ。
 
 - **state** — 単一の `state` オブジェクトが UI の全状態を持つ（`links` / `groups` / `query` / `tag` / `view` / `editingId` / `formTags` / 各メニューの開閉など）。DOM 参照は `els` に集約
 - **render** — `render()` を起点に `renderStats` / `renderTags` / `renderGroups` / `renderBoard` / `renderList` などが `state` から DOM を再構築する。差分更新はせず、毎回 `replaceChildren` で描き直す方針
@@ -41,7 +40,7 @@ python3 -m http.server 8000
 
 ## 守るべき不変条件（重要）
 
-- **クライアント完結を崩さない** — サーバー通信・外部 fetch・外部スクリプト読み込みを追加しない。title 推定はクリップボードと URL 文字列からのみ行う（要件 §5.1）
+- **クライアント完結を崩さない** — サーバー通信・外部 fetch・外部スクリプト読み込みを追加しない。title 推定はクリップボードと URL 文字列からのみ行う
 - **外部依存を増やさない** — 現状 CDN を含む外部リソースをゼロにしている。フォントも system スタックのみ。ライブラリ追加は単一ファイル・依存なしの方針に反する
 - **単一ファイルを保つ** — JS / CSS を別ファイルに分割しない
 - **localStorage スキーマはバージョン管理** — キーは `link-index:v1`。保存形式を破壊的に変える場合はキーの version を上げ、`load()` で旧形式を移行する
@@ -50,17 +49,20 @@ python3 -m http.server 8000
 
 ## 主要なシンボル（index.html 内）
 
-| 名前                                          | 役割                                  |
-| --------------------------------------------- | ------------------------------------- |
-| `STORAGE_KEY` / `NO_GROUP` / `DEFAULT_GROUPS` | 定数                                  |
-| `sampleLinks`                                 | 初回起動時のサンプルデータ            |
-| `state` / `els`                               | アプリ状態 / DOM 参照                 |
-| `load` / `persist` / `normalize*`             | 永続化・データ整形                    |
-| `getFilteredLinks`                            | 検索クエリ + タグでの絞り込み         |
-| `render` ほか `render*`                       | 描画                                  |
-| `openModal` / `closeModal` / `saveForm`       | リンク追加・編集モーダル              |
-| `inferTitleFromUrl` / `parseHtmlLink`         | title 自動推定（SharePoint 対応含む） |
-| `exportData` / `importData` / `applyImport`   | JSON の入出力                         |
+| 名前                                                    | 役割                                              |
+| ------------------------------------------------------- | ------------------------------------------------- |
+| `STORAGE_KEY` / `NO_GROUP` / `DEFAULT_GROUPS`           | 定数                                              |
+| `sampleLinks`                                           | 初回起動時のサンプルデータ                        |
+| `state` / `els`                                         | アプリ状態 / DOM 参照                             |
+| `load` / `persist` / `normalize*`                       | 永続化・データ整形                                |
+| `getFilteredLinks`                                      | 検索クエリ + タグでの絞り込み                     |
+| `render` ほか `render*`                                 | 描画                                              |
+| `openModal` / `closeModal` / `saveForm`                 | リンク追加・編集モーダル                          |
+| `openGroupsModal` / `commitGroupRename` / `deleteGroup` | グループ管理（追加・リネーム・削除）              |
+| `inferTitleFromUrl` / `parseHtmlLink`                   | title 自動推定（SharePoint 対応含む）             |
+| `exportData` / `importData` / `applyImport`             | JSON の入出力                                     |
+| `clearData` / `restoreSamples` / `renderStorageUsage`   | Data モーダル（全削除・サンプル復元・使用量表示） |
+| `showToast`                                             | 一時的な通知（保存失敗・容量超過など）            |
 
 ## コードスタイル
 
@@ -68,13 +70,13 @@ python3 -m http.server 8000
 - DOM はテンプレート文字列の `innerHTML` ではなく `createElement` + テキストノードで組み立てる（XSS 回避。SVG など固定マークアップのみ `innerHTML` を使用）
 - 文字列を画面に出すときは `textContent` を使い、ユーザー入力を HTML として解釈させない
 
-## 仕様上の判断 / 既知の差分
+## 仕様上の判断
 
-実装は要件をおおむね満たす。以下は意図的な判断（実装しない決定）と、要件との差分。改修時の参考に。
+以下は意図的な設計判断（あえて実装しない決定）。改修時の参考に。
 
-- **F-09 最近開いたリンク（実装しない）** — `lastOpenedAt` は `openLink()` で記録するが、Board への「最近開いたリンク」表示は **実装しない方針**（要件 §4.1 で対象外と決定）。`renderBoard` に Recent セクションを足さないこと
-- **note は編集ダイアログのみ（一覧に出さない）** — note の確認・編集は追加/編集モーダルでのみ行う運用。`renderList` に note 列を**足さない**（要件 §8.2 と一致）
-- **フォント** — 要件 §6 は Google Fonts を挙げるが、実装は外部フォント未使用（外部依存ゼロを優先）
+- **最近開いたリンク（実装しない）** — `lastOpenedAt` は `openLink()` で記録するが、Board への「最近開いたリンク」表示は **実装しない方針**。`renderBoard` に Recent セクションを足さないこと（Board 上部に固定表示するのは `renderFavorites` の Pinned のみ）
+- **note は編集ダイアログのみ（一覧に出さない）** — note の確認・編集は追加/編集モーダルでのみ行う運用。`renderList` に note 列を**足さない**（ただし全文検索 `getFilteredLinks` の対象には含む）
+- **フォント** — system フォントスタックのみを使用し、Google Fonts などの外部フォントは読み込まない（外部依存ゼロを優先）
 
 ## 変更時の確認観点
 
