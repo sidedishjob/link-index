@@ -1067,7 +1067,7 @@
 
       .group-item {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto auto;
         gap: 12px;
         align-items: center;
         min-height: 44px;
@@ -1076,31 +1076,52 @@
 
       .group-name {
         appearance: none;
-        border: 0;
+        border: 1px solid transparent;
         border-radius: 5px;
         background: transparent;
         color: var(--ink);
-        padding: 4px 6px;
+        padding: 4px 8px;
+        min-width: 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+        text-align: left;
+        cursor: text;
+      }
+
+      .group-name-label {
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-weight: 500;
-        text-align: left;
-        cursor: pointer;
+      }
+
+      .group-edit-icon {
+        display: inline-flex;
+        flex-shrink: 0;
+        color: var(--muted);
+        opacity: 0.5;
+        transition:
+          opacity 120ms ease,
+          color 120ms ease;
+      }
+
+      .group-edit-icon svg {
+        width: 13px;
+        height: 13px;
+        display: block;
       }
 
       .group-name:hover {
         background: var(--surface-muted);
+        border-color: var(--line-strong);
       }
 
-      .group-name:disabled {
-        cursor: default;
-        color: var(--muted);
-      }
-
-      .group-name:disabled:hover {
-        background: transparent;
+      .group-name:hover .group-edit-icon {
+        opacity: 1;
+        color: var(--ink);
       }
 
       .group-edit-input {
@@ -1118,8 +1139,9 @@
       .group-meta {
         color: var(--muted);
         font-size: 12px;
-        margin-left: 8px;
         font-weight: 400;
+        white-space: nowrap;
+        text-align: right;
       }
 
       .group-actions {
@@ -1425,16 +1447,6 @@
         </div>
         <form class="form" id="linkForm">
           <div class="field">
-            <label for="titleInput">Title *</label>
-            <input
-              id="titleInput"
-              name="title"
-              type="text"
-              placeholder="例: 基本設計書"
-              required
-            />
-          </div>
-          <div class="field">
             <label for="urlInput">URL *</label>
             <input
               id="urlInput"
@@ -1446,6 +1458,16 @@
             <div class="hint">
               URLを貼り付けると、タイトルが空の場合だけ候補を自動入力します。
             </div>
+          </div>
+          <div class="field">
+            <label for="titleInput">Title *</label>
+            <input
+              id="titleInput"
+              name="title"
+              type="text"
+              placeholder="例: 基本設計書"
+              required
+            />
           </div>
           <div class="form-grid">
             <div class="link-meta-grid">
@@ -2343,6 +2365,8 @@
       displayGroups.forEach((group) => {
           const item = document.createElement("div");
           item.className = "group-item";
+          const count = usage.get(group) || 0;
+          const inUse = count > 0;
 
           let name;
           if (state.editingGroup === group) {
@@ -2370,15 +2394,25 @@
             name = document.createElement("button");
             name.type = "button";
             name.className = "group-name";
-            name.title = "クリックしてグループ名を編集";
-            name.textContent = group;
+            name.title = "クリックして名前を編集";
             name.addEventListener("click", () => startGroupRename(group));
 
-            const meta = document.createElement("span");
-            meta.className = "group-meta";
-            meta.textContent = `${usage.get(group) || 0}`;
-            name.append(meta);
+            const label = document.createElement("span");
+            label.className = "group-name-label";
+            label.textContent = group;
+
+            const editIcon = document.createElement("span");
+            editIcon.className = "group-edit-icon";
+            editIcon.setAttribute("aria-hidden", "true");
+            editIcon.innerHTML =
+              '<svg viewBox="0 0 16 16" fill="none"><path d="M11.7 2.3 13.7 4.3 5.6 12.4 2.8 13.2 3.6 10.4 11.7 2.3Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.3 3.7 12.3 5.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+
+            name.append(label, editIcon);
           }
+
+          const meta = document.createElement("span");
+          meta.className = "group-meta";
+          meta.textContent = `${count} ${count === 1 ? "link" : "links"}`;
 
           const actions = document.createElement("div");
           actions.className = "group-actions";
@@ -2388,13 +2422,12 @@
             () => deleteGroup(group),
             "danger",
           );
-          remove.disabled = (usage.get(group) || 0) > 0;
-          remove.title = remove.disabled
-            ? "使用中のグループは削除できません"
-            : "グループ候補から削除";
+          remove.title = inUse
+            ? `${count} 件のリンクを残してグループを削除`
+            : "グループを削除";
           actions.append(remove);
 
-          item.append(name, actions);
+          item.append(name, meta, actions);
           els.groupList.append(item);
         });
       }
@@ -2724,8 +2757,8 @@
               ? { ...link, lastOpenedAt: Date.now() }
               : link,
           );
+          // lastOpenedAt は画面に出さない（Recent 非実装）。記録だけ残し、再描画はしない。
           persist();
-          render();
         }
       }
 
@@ -3008,17 +3041,38 @@
       }
 
       function deleteGroup(group) {
-        const used = state.links.some(
-          (link) => cleanGroup(link.group) === group,
-        );
-        if (group === NO_GROUP || used) {
-          showToast("使用中のグループは削除できません");
+        if (group === NO_GROUP) {
+          showToast("未所属は削除できません");
           return;
         }
+        // 使用中でも削除可。所属リンクは消さず「未分類」へ逃がす（非破壊）。
+        const linkedCount = state.links.filter(
+          (link) => cleanGroup(link.group) === group,
+        ).length;
+        if (linkedCount) {
+          const ok = confirm(
+            `「${group}」を削除しますか？\n` +
+              `このグループの ${linkedCount} 件のリンクは残ります。`,
+          );
+          if (!ok) return;
+          const now = Date.now();
+          state.links = state.links.map((link) =>
+            cleanGroup(link.group) === group
+              ? { ...link, group: NO_GROUP, updatedAt: now }
+              : link,
+          );
+        }
         state.groups = state.groups.filter((item) => item !== group);
+        state.collapsedGroups = state.collapsedGroups.filter(
+          (item) => item !== group,
+        );
         persist();
         render();
-        showToast("グループを削除しました");
+        showToast(
+          linkedCount
+            ? `${linkedCount} 件のリンクを残してグループを削除しました`
+            : "グループを削除しました",
+        );
       }
 
       function deleteLink(id) {
