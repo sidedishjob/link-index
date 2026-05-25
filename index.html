@@ -56,12 +56,18 @@
       button,
       input,
       textarea {
-        font: inherit;
-      }
+      font: inherit;
+    }
 
-      button {
-        color: inherit;
-      }
+    input::placeholder,
+    textarea::placeholder {
+      color: #b8b7b3;
+      opacity: 1;
+    }
+
+    button {
+      color: inherit;
+    }
 
       a {
         color: inherit;
@@ -216,31 +222,63 @@
       }
 
       .segments {
-        display: inline-grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 3px;
-        padding: 3px;
+        display: inline-flex;
+        align-items: center;
+        overflow: hidden;
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        background: var(--surface-muted);
+        background: var(--surface);
       }
 
       .segment {
-        height: 32px;
+        position: relative;
+        min-width: 104px;
+        height: 42px;
         border: 0;
-        border-radius: 5px;
+        border-radius: 0;
         background: transparent;
         color: var(--muted);
-        padding: 0 16px;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
         cursor: pointer;
         font-size: 14px;
         font-weight: 500;
+        transition:
+          background 120ms ease,
+          color 120ms ease;
+      }
+
+      .segment + .segment {
+        border-left: 1px solid var(--line);
       }
 
       .segment[aria-pressed="true"] {
-        background: var(--surface);
         color: var(--ink);
-        box-shadow: 0 1px 2px rgba(15, 15, 15, 0.08);
+        background: #fbfbfa;
+      }
+
+      .segment[aria-pressed="true"]::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 2px;
+        background: var(--accent);
+      }
+
+      .segment:hover {
+        background: var(--surface-muted);
+        color: var(--ink);
+      }
+
+      .segment svg {
+        width: 16px;
+        height: 16px;
+        color: currentColor;
       }
 
       .search-wrap {
@@ -499,6 +537,13 @@
         display: block;
       }
 
+      /* 全リンク（All）はグループ群と区切って下部に置き、横幅いっぱいに使う */
+      .group-section--all {
+        border-top: 1px solid var(--line-strong);
+        margin-top: 8px;
+        grid-column: 1 / -1;
+      }
+
       .count {
         color: var(--muted);
         font-size: 12px;
@@ -552,9 +597,13 @@
       }
 
       .board-link-title {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        overflow-wrap: anywhere;
+        line-height: 1.35;
       }
 
       .list {
@@ -736,35 +785,6 @@
         font-size: 13px;
       }
 
-      .active-filters {
-        display: none;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: -4px 0 14px;
-      }
-
-      .active-filters.open {
-        display: flex;
-      }
-
-      .filter-pill {
-        min-height: 30px;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        background: var(--surface-muted);
-        color: var(--ink);
-        padding: 0 10px;
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        cursor: pointer;
-        font-size: 13px;
-      }
-
-      .filter-pill span {
-        color: var(--muted);
-      }
-
       .modal {
         position: fixed;
         inset: 0;
@@ -788,6 +808,10 @@
         border-radius: 8px;
         background: var(--surface);
         box-shadow: var(--shadow);
+      }
+
+      #modal .dialog {
+        overflow: visible;
       }
 
       .dialog-head {
@@ -1198,6 +1222,8 @@
         }
 
         .segment {
+          flex: 1;
+          min-width: 0;
           padding: 0 10px;
         }
 
@@ -1307,7 +1333,10 @@
             type="button"
             aria-pressed="true"
           >
-            Board
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            </svg>
+            <span>Board</span>
           </button>
           <button
             class="segment"
@@ -1315,7 +1344,10 @@
             type="button"
             aria-pressed="false"
           >
-            List
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M8 6h11M8 12h11M8 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+            <span>List</span>
           </button>
         </div>
         <label class="search-wrap" aria-label="検索">
@@ -1356,11 +1388,6 @@
         </div>
       </section>
 
-      <div
-        class="active-filters"
-        id="activeFilters"
-        aria-label="有効な絞り込み"
-      ></div>
       <nav class="tagbar" id="tagbar" aria-label="タグ絞り込み"></nav>
 
       <main>
@@ -1599,6 +1626,8 @@
     <script>
       const STORAGE_KEY = "link-index:v1";
       const NO_GROUP = "no group";
+      // ボード最下部の「全リンク」セクション用の予約キー（折りたたみ状態の保存に使う）
+      const ALL_SECTION = "::all::";
       const DEFAULT_GROUPS = [
         "設計工程",
         "製造工程",
@@ -1786,7 +1815,6 @@
         searchInput: document.querySelector("#searchInput"),
         tagToggleButton: document.querySelector("#tagToggleButton"),
         stats: document.querySelector("#stats"),
-        activeFilters: document.querySelector("#activeFilters"),
         tagbar: document.querySelector("#tagbar"),
         boardView: document.querySelector("#boardView"),
         listView: document.querySelector("#listView"),
@@ -2020,7 +2048,6 @@
         const filtered = getFilteredLinks();
         renderStats(filtered);
         renderTags();
-        renderActiveFilters();
         renderGroups();
         if (els.groupsModal.classList.contains("open")) renderGroupList();
         if (state.view === "board") {
@@ -2082,28 +2109,6 @@
           render();
         });
         return button;
-      }
-
-      function renderActiveFilters() {
-        els.activeFilters.replaceChildren();
-        if (state.tag === "all") {
-          els.activeFilters.classList.remove("open");
-          return;
-        }
-
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "filter-pill";
-        const label = document.createElement("span");
-        label.textContent = "tag";
-        chip.append(label, document.createTextNode(`${state.tag} x`));
-        chip.title = "タグ絞り込みを解除";
-        chip.addEventListener("click", () => {
-          state.tag = "all";
-          render();
-        });
-        els.activeFilters.append(chip);
-        els.activeFilters.classList.add("open");
       }
 
       function getAllTags() {
@@ -2236,9 +2241,9 @@
 
       function renderGroupSelect() {
         const query = state.groupFilter.trim().toLowerCase();
-        const candidates = state.groups.filter(
-          (group) => !query || group.toLowerCase().includes(query),
-        );
+        const candidates = state.groups
+          .filter((group) => group !== NO_GROUP)
+          .filter((group) => !query || group.toLowerCase().includes(query));
         els.groupMenu.replaceChildren();
 
         candidates.forEach((group) => {
@@ -2316,7 +2321,7 @@
 
       function selectGroup(value, shouldFocus = true) {
         const group = cleanGroup(value);
-        els.groupInput.value = group;
+        els.groupInput.value = group === NO_GROUP ? "" : group;
         state.groupMenuOpen = false;
         state.groupActiveIndex = 0;
         state.groupFilter = "";
@@ -2332,7 +2337,10 @@
           usage.set(group, (usage.get(group) || 0) + 1);
         });
 
-        state.groups.forEach((group) => {
+      // 未所属は改名も削除もできないため、グループ管理には出さない
+      const displayGroups = state.groups.filter((group) => group !== NO_GROUP);
+
+      displayGroups.forEach((group) => {
           const item = document.createElement("div");
           item.className = "group-item";
 
@@ -2362,10 +2370,7 @@
             name = document.createElement("button");
             name.type = "button";
             name.className = "group-name";
-            name.disabled = group === NO_GROUP;
-            name.title = name.disabled
-              ? "no groupは改名できません"
-              : "クリックしてグループ名を編集";
+            name.title = "クリックしてグループ名を編集";
             name.textContent = group;
             name.addEventListener("click", () => startGroupRename(group));
 
@@ -2383,7 +2388,7 @@
             () => deleteGroup(group),
             "danger",
           );
-          remove.disabled = group === NO_GROUP || (usage.get(group) || 0) > 0;
+          remove.disabled = (usage.get(group) || 0) > 0;
           remove.title = remove.disabled
             ? "使用中のグループは削除できません"
             : "グループ候補から削除";
@@ -2402,12 +2407,13 @@
         }
 
         const grouped = groupBy(links, (link) => cleanGroup(link.group));
+        // グループセクションは実グループのみ。未所属はセクション化しない
         const orderedGroups = [
           ...state.groups,
           ...Object.keys(grouped)
             .filter((group) => !state.groups.includes(group))
             .sort((a, b) => a.localeCompare(b, "ja")),
-        ];
+        ].filter((group) => group !== NO_GROUP);
         const pinnedLinks = links.filter((link) => link.pinned);
         const favorites = renderFavorites(pinnedLinks);
         if (favorites) els.boardView.append(favorites);
@@ -2419,6 +2425,13 @@
           const groupLinks = grouped[group];
           if (!groupLinks || !groupLinks.length) return;
           appendBoardSection(board, group, groupLinks);
+        });
+
+        // グループの下に全リンクを表示（所属の有無を問わず全件。グループ所属リンクは両方に出る）
+        appendBoardSection(board, ALL_SECTION, links, {
+          label: "All",
+          showAdd: false,
+          variant: "group-section--all",
         });
 
         els.boardView.append(board);
@@ -2465,12 +2478,19 @@
         return section;
       }
 
-      function appendBoardSection(board, group, groupLinks) {
+      function appendBoardSection(board, group, groupLinks, options = {}) {
         if (!groupLinks.length) return;
-        const isCollapsed = state.collapsedGroups.includes(group);
+        const {
+          collapseKey = group,
+          label = group,
+          showAdd = true,
+          variant = "",
+        } = options;
+        const isCollapsed = state.collapsedGroups.includes(collapseKey);
         const section = document.createElement("section");
         section.className = "group-section";
         section.classList.toggle("collapsed", isCollapsed);
+        if (variant) section.classList.add(variant);
 
         const head = document.createElement("div");
         head.className = "group-head";
@@ -2482,26 +2502,28 @@
         titleWrap.setAttribute("aria-expanded", String(!isCollapsed));
         titleWrap.setAttribute(
           "aria-label",
-          `${group} を${isCollapsed ? "展開" : "折りたたみ"}`,
+          `${label} を${isCollapsed ? "展開" : "折りたたみ"}`,
         );
-        titleWrap.addEventListener("click", () => toggleGroup(group));
+        titleWrap.addEventListener("click", () => toggleGroup(collapseKey));
         const toggle = document.createElement("span");
         toggle.className = "group-toggle";
         toggle.innerHTML =
           '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 6 8 9.5 11.5 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         const title = document.createElement("h2");
         title.className = "group-title";
-        title.textContent = group;
+        title.textContent = label;
         titleWrap.append(toggle, title);
         titleArea.append(titleWrap);
-        const add = document.createElement("button");
-        add.type = "button";
-        add.className = "group-add";
-        add.textContent = "+";
-        add.setAttribute("aria-label", `${group} にリンクを追加`);
-        add.title = `${group} にリンクを追加`;
-        add.addEventListener("click", () => openModal(null, { group }));
-        titleArea.append(add);
+        if (showAdd) {
+          const add = document.createElement("button");
+          add.type = "button";
+          add.className = "group-add";
+          add.textContent = "+";
+          add.setAttribute("aria-label", `${label} にリンクを追加`);
+          add.title = `${label} にリンクを追加`;
+          add.addEventListener("click", () => openModal(null, { group }));
+          titleArea.append(add);
+        }
         const count = document.createElement("span");
         count.className = "count";
         count.textContent = `${groupLinks.length} ${groupLinks.length === 1 ? "link" : "links"}`;
@@ -2591,7 +2613,9 @@
 
           const group = document.createElement("div");
           group.className = "row-group";
-          group.textContent = cleanGroup(link.group);
+          const linkGroup = cleanGroup(link.group);
+          // 未所属は List の GROUP 列を空欄にする
+          group.textContent = linkGroup === NO_GROUP ? "" : linkGroup;
 
           const tags = document.createElement("div");
           tags.className = "row-tags";
@@ -2820,9 +2844,9 @@
           state.autoTitleValue = "";
           els.urlInput.value = link?.url || "";
           els.titleInput.value = link?.title || "";
-          els.groupInput.value = cleanGroup(
-            link?.group || defaults.group || NO_GROUP,
-          );
+          const sourceGroup =
+            link || defaults.group ? cleanGroup(link?.group || defaults.group) : "";
+          els.groupInput.value = sourceGroup === NO_GROUP ? "" : sourceGroup;
           state.formTags = [...(link?.tags || [])];
           els.noteInput.value = link?.note || "";
           state.formLoadedFor = draftKey;
@@ -2939,7 +2963,7 @@
 
       function startGroupRename(group) {
         if (group === NO_GROUP) {
-          showToast("no groupは改名できません");
+          showToast("未所属は改名できません");
           return;
         }
         state.editingGroup = group;
