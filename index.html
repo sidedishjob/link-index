@@ -109,11 +109,13 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-end;
-        gap: 8px;
+        gap: 10px;
+        align-items: center;
       }
 
       .settings-wrap {
         position: relative;
+        margin-right: 4px;
       }
 
       .settings-menu {
@@ -188,9 +190,26 @@
       }
 
       .button.icon svg {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
         display: block;
+      }
+
+      .button.ghost {
+        border-color: transparent;
+        background: transparent;
+        color: var(--muted);
+        padding-inline: 10px;
+      }
+
+      .button.ghost:hover {
+        border-color: transparent;
+        background: var(--surface-muted);
+        color: var(--ink);
+      }
+
+      .button.ghost:active {
+        background: #ededeb;
       }
 
       .button.danger {
@@ -1773,10 +1792,12 @@
           <h1>Link Index</h1>
         </div>
         <div class="actions" aria-label="データ操作">
-          <button class="button" id="groupsButton" type="button">Groups</button>
+          <button class="button ghost" id="groupsButton" type="button">
+            Groups
+          </button>
           <div class="settings-wrap">
             <button
-              class="button icon"
+              class="button icon ghost"
               id="settingsButton"
               type="button"
               aria-label="設定"
@@ -3540,7 +3561,11 @@
         // Board のグループ「+」と Edit は常に対象内容で読み込み直す。
         // Quick add からの「詳細→」昇格は url/title/tags を引き継ぐ。prefill が
         // ある場合は下書き保持(__new__)の対象外にして、必ず読み込み直す。
-        const hasPrefill = !!(defaults.url || defaults.title || defaults.tags?.length);
+        const hasPrefill = !!(
+          defaults.url ||
+          defaults.title ||
+          defaults.tags?.length
+        );
         const draftKey =
           !link && defaults.group == null && !hasPrefill ? "__new__" : null;
         const keepDraft = draftKey !== null && state.formLoadedFor === draftKey;
@@ -3733,7 +3758,8 @@
         if (event.shiftKey || event.metaKey || event.ctrlKey || event.altKey)
           return;
         const field = event.target;
-        if (field !== els.quickUrlInput && field !== els.quickTitleInput) return;
+        if (field !== els.quickUrlInput && field !== els.quickTitleInput)
+          return;
         const atEnd =
           field.selectionStart === field.selectionEnd &&
           field.selectionStart === field.value.length;
