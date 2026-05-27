@@ -1393,6 +1393,256 @@
         transform: translateX(-50%) translateY(0);
       }
 
+      .quick-add {
+        position: fixed;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px) scale(0.985);
+        width: min(600px, calc(100vw - 28px));
+        display: none;
+        opacity: 0;
+        transition:
+          opacity 160ms ease,
+          transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 25;
+      }
+
+      .quick-add.open {
+        display: block;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+
+      .quick-add-card {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid var(--line-strong);
+        border-radius: 12px;
+        background: var(--surface);
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.7) inset,
+          0 20px 50px rgba(15, 15, 15, 0.16);
+      }
+
+      .quick-add-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .quick-add-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .quick-add-spark {
+        width: 15px;
+        height: 15px;
+        color: var(--accent);
+      }
+
+      .quick-add-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--faint);
+        cursor: pointer;
+        transition:
+          background 120ms ease,
+          color 120ms ease;
+      }
+
+      .quick-add-close:hover {
+        background: var(--surface-muted);
+        color: var(--ink);
+      }
+
+      .quick-add-close svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .quick-add-field {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        height: 46px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        cursor: text;
+        transition:
+          border-color 120ms ease,
+          box-shadow 120ms ease,
+          background 120ms ease;
+      }
+
+      .quick-add-field:focus-within {
+        border-color: var(--focus);
+        box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.14);
+      }
+
+      .quick-add-field-sub {
+        height: 40px;
+        border-color: transparent;
+        background: var(--surface-muted);
+      }
+
+      .quick-add-field-sub:focus-within {
+        background: #ffffff;
+      }
+
+      .quick-add-glyph {
+        flex: none;
+        width: 18px;
+        height: 18px;
+        color: var(--faint);
+      }
+
+      .quick-add-glyph-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      .quick-add-url,
+      .quick-add-title {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        outline: none;
+        padding: 0;
+      }
+
+      .quick-add-url {
+        font-size: 15px;
+      }
+
+      .quick-add-title {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      /* グローバルの input:focus リングは field 側(:focus-within)に委譲する。 */
+      .quick-add-url:focus,
+      .quick-add-title:focus {
+        box-shadow: none;
+        border-color: transparent;
+      }
+
+      .quick-add-foot {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .quick-add-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .quick-add-detail,
+      .quick-add-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 34px;
+        padding: 0 11px;
+        border-radius: var(--radius);
+        font-size: 13px;
+        cursor: pointer;
+        transition:
+          background 120ms ease,
+          color 120ms ease,
+          border-color 120ms ease,
+          filter 120ms ease,
+          transform 80ms ease;
+      }
+
+      .quick-add-detail {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--muted);
+      }
+
+      .quick-add-detail:hover {
+        border-color: var(--line-strong);
+        background: var(--surface-muted);
+        color: var(--ink);
+      }
+
+      .quick-add-submit {
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+        font-weight: 500;
+        padding: 0 13px;
+      }
+
+      .quick-add-submit:hover {
+        filter: brightness(1.18);
+      }
+
+      .quick-add-detail:active,
+      .quick-add-submit:active {
+        transform: translateY(1px);
+      }
+
+      .quick-add-detail:focus-visible,
+      .quick-add-submit:focus-visible,
+      .quick-add-close:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.18);
+      }
+
+      .qa-key {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+        border: 1px solid var(--line-strong);
+        border-radius: 5px;
+        background: var(--surface-muted);
+        color: var(--muted);
+        font-family:
+          ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono",
+          Menlo, monospace;
+        font-size: 11px;
+        line-height: 1;
+      }
+
+      .qa-key-invert {
+        border-color: rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.16);
+        color: #ffffff;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .quick-add,
+        .quick-add.open {
+          transform: translateX(-50%);
+          transition: opacity 120ms ease;
+        }
+      }
+
       .hidden-input {
         display: none;
       }
@@ -1501,6 +1751,16 @@
 
         .link-button {
           grid-template-columns: 14px minmax(0, 1fr);
+        }
+
+        .quick-add-foot {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 12px;
+        }
+
+        .quick-add-actions {
+          justify-content: flex-end;
         }
       }
     </style>
@@ -1888,6 +2148,114 @@
       </div>
     </div>
 
+    <div
+      class="quick-add"
+      id="quickAdd"
+      role="dialog"
+      aria-modal="true"
+      aria-label="クイック追加"
+    >
+      <form class="quick-add-card" id="quickAddForm">
+        <div class="quick-add-head">
+          <span class="quick-add-brand">
+            <svg
+              class="quick-add-spark"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M13 2 3 14h9l-1 8 10-12h-9z"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+            </svg>
+            クイック追加
+          </span>
+          <button
+            class="quick-add-close"
+            id="quickCloseButton"
+            type="button"
+            aria-label="閉じる"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M18 6 6 18M6 6l12 12"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <label class="quick-add-field">
+          <svg
+            class="quick-add-glyph"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <input
+            class="quick-add-url"
+            id="quickUrlInput"
+            type="text"
+            inputmode="url"
+            autocomplete="off"
+            placeholder="URL を入力 / 貼り付け"
+            aria-label="URL"
+          />
+        </label>
+
+        <label class="quick-add-field quick-add-field-sub">
+          <span class="quick-add-glyph quick-add-glyph-mark" aria-hidden="true"
+            >↳</span
+          >
+          <input
+            class="quick-add-title"
+            id="quickTitleInput"
+            type="text"
+            autocomplete="off"
+            placeholder="タイトル（自動入力・編集可）"
+            aria-label="Title"
+          />
+        </label>
+
+        <div class="quick-add-foot">
+          <div class="quick-add-actions">
+            <button
+              class="quick-add-detail"
+              id="quickDetailsButton"
+              type="button"
+            >
+              詳細
+              <kbd class="qa-key">→</kbd>
+            </button>
+            <button class="quick-add-submit" type="submit">
+              追加
+              <kbd class="qa-key qa-key-invert">↵</kbd>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
@@ -2074,6 +2442,8 @@
         copiedLinkId: null,
         pendingGroupLink: null,
         formLoadedFor: null,
+        quickAddOpen: false,
+        quickAutoTitle: "",
       };
 
       const els = {
@@ -2127,6 +2497,12 @@
         tagMenu: document.querySelector("#tagMenu"),
         noteInput: document.querySelector("#noteInput"),
         toast: document.querySelector("#toast"),
+        quickAdd: document.querySelector("#quickAdd"),
+        quickAddForm: document.querySelector("#quickAddForm"),
+        quickUrlInput: document.querySelector("#quickUrlInput"),
+        quickTitleInput: document.querySelector("#quickTitleInput"),
+        quickDetailsButton: document.querySelector("#quickDetailsButton"),
+        quickCloseButton: document.querySelector("#quickCloseButton"),
       };
 
       function load() {
@@ -2919,19 +3295,15 @@
 
           const tags = document.createElement("div");
           tags.className = "row-tags";
-          tags.title = link.tags.length ? link.tags.join(", ") : "no tags";
+          // タグなしは List の TAGS 列を空欄にする（GROUP 列と同様）
           if (link.tags.length) {
+            tags.title = link.tags.join(", ");
             link.tags.forEach((tag) => {
               const span = document.createElement("span");
               span.className = "mini-tag";
               span.textContent = tag;
               tags.append(span);
             });
-          } else {
-            const span = document.createElement("span");
-            span.className = "mini-tag";
-            span.textContent = "no tags";
-            tags.append(span);
           }
 
           const actions = document.createElement("div");
@@ -3105,6 +3477,7 @@
 
       const appEl = document.querySelector(".app");
       let lastFocusedBeforeModal = null;
+      let lastFocusedBeforeQuickAdd = null;
 
       function isAnyModalOpen() {
         return document.querySelector(".modal.open") !== null;
@@ -3165,7 +3538,11 @@
         onModalOpen();
         // 下書きの保持はヘッダーの「+ New」だけ（link なし・グループ指定なし）。
         // Board のグループ「+」と Edit は常に対象内容で読み込み直す。
-        const draftKey = !link && defaults.group == null ? "__new__" : null;
+        // Quick add からの「詳細→」昇格は url/title/tags を引き継ぐ。prefill が
+        // ある場合は下書き保持(__new__)の対象外にして、必ず読み込み直す。
+        const hasPrefill = !!(defaults.url || defaults.title || defaults.tags?.length);
+        const draftKey =
+          !link && defaults.group == null && !hasPrefill ? "__new__" : null;
         const keepDraft = draftKey !== null && state.formLoadedFor === draftKey;
 
         els.modalTitle.textContent = link ? "Edit link" : "New link";
@@ -3173,14 +3550,14 @@
         if (!keepDraft) {
           state.editingId = link?.id || null;
           state.autoTitleValue = "";
-          els.urlInput.value = link?.url || "";
-          els.titleInput.value = link?.title || "";
+          els.urlInput.value = link?.url || defaults.url || "";
+          els.titleInput.value = link?.title || defaults.title || "";
           const sourceGroup =
             link || defaults.group
               ? cleanGroup(link?.group || defaults.group)
               : "";
           els.groupInput.value = sourceGroup === NO_GROUP ? "" : sourceGroup;
-          state.formTags = [...(link?.tags || [])];
+          state.formTags = [...(link?.tags || defaults.tags || [])];
           els.noteInput.value = link?.note || "";
           state.formLoadedFor = draftKey;
         }
@@ -3210,6 +3587,159 @@
         renderGroupSelect();
         renderTagSelect();
         onModalClose();
+      }
+
+      // クイック追加バー。貼り付け(Cmd/Ctrl+V)＝起動＆取り込みで、Enter だけで
+      // 未所属に登録する。確認は最小（Title だけその場で確認・編集可能）。
+      function openQuickAdd(clipboardData) {
+        lastFocusedBeforeQuickAdd = document.activeElement;
+        state.quickAddOpen = true;
+        state.quickAutoTitle = "";
+        els.quickUrlInput.value = "";
+        els.quickTitleInput.value = "";
+        if (clipboardData) {
+          const html = clipboardData.getData("text/html") || "";
+          const text = clipboardData.getData("text/plain") || "";
+          const parsed = parseHtmlLink(html);
+          if (parsed?.url) {
+            els.quickUrlInput.value = parsed.url;
+            setQuickTitle(parsed.title || inferTitleFromUrl(parsed.url));
+          } else if (text.trim()) {
+            els.quickUrlInput.value = text.trim();
+            setQuickTitle(inferTitleFromUrl(text));
+          }
+        }
+        els.quickAdd.classList.add("open");
+        setTimeout(() => els.quickUrlInput.focus(), 0);
+      }
+
+      function closeQuickAdd(restoreFocus = true) {
+        els.quickAdd.classList.remove("open");
+        state.quickAddOpen = false;
+        state.quickAutoTitle = "";
+        if (
+          restoreFocus &&
+          lastFocusedBeforeQuickAdd &&
+          document.contains(lastFocusedBeforeQuickAdd)
+        ) {
+          lastFocusedBeforeQuickAdd.focus();
+        }
+        lastFocusedBeforeQuickAdd = null;
+      }
+
+      // ユーザーが手で直した Title は上書きしないよう、自動入力値を覚えておく。
+      function setQuickTitle(title) {
+        const normalizedTitle = String(title || "").trim();
+        if (!normalizedTitle) return;
+        els.quickTitleInput.value = normalizedTitle;
+        state.quickAutoTitle = normalizedTitle;
+      }
+
+      function clearQuickTitle() {
+        if (els.quickTitleInput.value.trim() === state.quickAutoTitle) {
+          els.quickTitleInput.value = "";
+        }
+        state.quickAutoTitle = "";
+      }
+
+      function handleQuickUrlInput() {
+        if (!els.quickUrlInput.value.trim()) {
+          clearQuickTitle();
+          return;
+        }
+        if (
+          els.quickTitleInput.value.trim() &&
+          els.quickTitleInput.value.trim() !== state.quickAutoTitle
+        )
+          return;
+        const title = inferTitleFromUrl(els.quickUrlInput.value);
+        if (title) setQuickTitle(title);
+      }
+
+      function handleQuickUrlPaste(event) {
+        if (
+          els.quickTitleInput.value.trim() &&
+          els.quickTitleInput.value.trim() !== state.quickAutoTitle
+        )
+          return;
+        const clipboard = event.clipboardData;
+        const html = clipboard?.getData("text/html") || "";
+        const text = clipboard?.getData("text/plain") || "";
+        const parsed = parseHtmlLink(html);
+        if (parsed?.url) {
+          event.preventDefault();
+          els.quickUrlInput.value = parsed.url;
+          setQuickTitle(parsed.title || inferTitleFromUrl(parsed.url));
+          return;
+        }
+        const title = inferTitleFromUrl(text);
+        if (title) {
+          setTimeout(() => {
+            if (
+              !els.quickTitleInput.value.trim() ||
+              els.quickTitleInput.value.trim() === state.quickAutoTitle
+            )
+              setQuickTitle(title);
+          }, 0);
+        }
+      }
+
+      function saveQuick(event) {
+        event.preventDefault();
+        const url = normalizeUrl(els.quickUrlInput.value);
+        if (!url) {
+          showToast("URL を入力してください");
+          return;
+        }
+        const title =
+          els.quickTitleInput.value.trim() || inferTitleFromUrl(url) || url;
+        const duplicate = state.links.find((link) => link.url === url);
+        if (duplicate) {
+          showToast(`既に登録済み：${duplicate.title}`);
+          closeQuickAdd();
+          return;
+        }
+        state.links = [
+          {
+            id: uid(),
+            title,
+            url,
+            group: NO_GROUP,
+            tags: [],
+            note: "",
+            createdAt: Date.now(),
+          },
+          ...state.links,
+        ];
+        persist();
+        closeQuickAdd();
+        render();
+        showToast("追加しました");
+      }
+
+      // フルモーダルへ昇格（グループ・タグ・メモを足したいとき）。URL/Title を引き継ぐ。
+      function escalateToModal() {
+        const url = els.quickUrlInput.value;
+        const title = els.quickTitleInput.value.trim();
+        closeQuickAdd(false);
+        openModal(null, { url, title });
+        setTimeout(() => els.titleInput.focus(), 0);
+      }
+
+      // → キーで詳細(フルモーダル)へ。カーソルが入力末尾にあるときだけ発火し、
+      // 文中のカーソル移動は通常どおり残す。
+      function handleQuickKeydown(event) {
+        if (event.key !== "ArrowRight") return;
+        if (event.shiftKey || event.metaKey || event.ctrlKey || event.altKey)
+          return;
+        const field = event.target;
+        if (field !== els.quickUrlInput && field !== els.quickTitleInput) return;
+        const atEnd =
+          field.selectionStart === field.selectionEnd &&
+          field.selectionStart === field.value.length;
+        if (!atEnd) return;
+        event.preventDefault();
+        escalateToModal();
       }
 
       function openGroupsModal() {
@@ -3795,6 +4325,15 @@
       els.groupForm.addEventListener("submit", saveGroup);
       els.urlInput.addEventListener("input", handleUrlInput);
       els.urlInput.addEventListener("paste", handleUrlPaste);
+      els.quickAddForm.addEventListener("submit", saveQuick);
+      els.quickUrlInput.addEventListener("input", handleQuickUrlInput);
+      els.quickUrlInput.addEventListener("paste", handleQuickUrlPaste);
+      els.quickDetailsButton.addEventListener("click", escalateToModal);
+      els.quickCloseButton.addEventListener("click", () => closeQuickAdd());
+      els.quickAdd.addEventListener("keydown", (event) =>
+        trapFocus(event, els.quickAdd),
+      );
+      els.quickAdd.addEventListener("keydown", handleQuickKeydown);
       els.groupInput.addEventListener("focus", () => {
         state.tagMenuOpen = false;
         renderTagSelect();
@@ -3986,9 +4525,28 @@
         },
       );
 
+      els.quickAdd.addEventListener("click", (event) => {
+        if (event.target === els.quickAdd) closeQuickAdd();
+      });
+
+      // ボード上で URL を貼り付け(Cmd/Ctrl+V)＝クイック追加バーを起動して取り込む。
+      // 入力中・モーダル中・バー表示中は通常の貼り付けに任せる。
+      document.addEventListener("paste", (event) => {
+        const activeTag = document.activeElement?.tagName;
+        const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(activeTag);
+        if (isTyping || isAnyModalOpen() || state.quickAddOpen) return;
+        event.preventDefault();
+        openQuickAdd(event.clipboardData);
+      });
+
       document.addEventListener("keydown", (event) => {
         const activeTag = document.activeElement?.tagName;
         const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(activeTag);
+
+        if (event.key === "Escape" && state.quickAddOpen) {
+          closeQuickAdd();
+          return;
+        }
 
         if (event.key === "Escape" && els.modal.classList.contains("open")) {
           closeModal();
@@ -4025,8 +4583,20 @@
           return;
         }
 
+        // クイック追加バーを明示的に開く（クリップボード読取はせず空で開く）。
+        // フォーカス位置に依らず効くよう isTyping ガードより前に置く。
+        if (
+          (event.metaKey || event.ctrlKey) &&
+          event.shiftKey &&
+          event.key.toLowerCase() === "l"
+        ) {
+          event.preventDefault();
+          if (!isAnyModalOpen() && !state.quickAddOpen) openQuickAdd(null);
+          return;
+        }
+
         if (isTyping) return;
-        if (isAnyModalOpen()) return;
+        if (isAnyModalOpen() || state.quickAddOpen) return;
 
         if (event.key === "/") {
           event.preventDefault();
