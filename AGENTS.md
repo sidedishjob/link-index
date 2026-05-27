@@ -62,6 +62,7 @@ python3 -m http.server 8000
 | `inferTitleFromUrl` / `parseHtmlLink`                   | title 自動推定（SharePoint 対応含む）             |
 | `exportData` / `importData` / `applyImport`             | JSON の入出力                                     |
 | `clearData` / `restoreSamples` / `renderStorageUsage`   | Data モーダル（全削除・サンプル復元・使用量表示） |
+| `openHelpModal` / `closeHelpModal`                      | Help モーダル（使い方・ショートカット一覧）       |
 | `showToast`                                             | 一時的な通知（保存失敗・容量超過など）            |
 
 ## コードスタイル
