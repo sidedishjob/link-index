@@ -302,10 +302,32 @@
         border: 1px solid var(--line);
         border-radius: var(--radius);
         background: var(--surface);
-        padding: 0 14px 0 38px;
+        padding: 0 42px 0 38px;
         color: var(--ink);
         outline: none;
         font-size: 14px;
+      }
+
+      .search-key {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        min-width: 22px;
+        height: 22px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: var(--surface-muted);
+        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-family:
+          ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono",
+          Menlo, monospace;
+        line-height: 1;
+        pointer-events: none;
       }
 
       .search:focus,
@@ -1609,6 +1631,7 @@
             type="search"
             placeholder="タイトル、URL、グループ、タグ、メモを検索"
           />
+          <span class="search-key" aria-hidden="true">/</span>
         </label>
         <div class="toolbar-meta">
           <button
