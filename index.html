@@ -56,18 +56,18 @@
       button,
       input,
       textarea {
-      font: inherit;
-    }
+        font: inherit;
+      }
 
-    input::placeholder,
-    textarea::placeholder {
-      color: #b8b7b3;
-      opacity: 1;
-    }
+      input::placeholder,
+      textarea::placeholder {
+        color: #b8b7b3;
+        opacity: 1;
+      }
 
-    button {
-      color: inherit;
-    }
+      button {
+        color: inherit;
+      }
 
       a {
         color: inherit;
@@ -376,23 +376,35 @@
 
       .board {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
+        grid-template-columns: 1fr;
+        gap: 6px;
         align-items: start;
       }
 
       .favorites-section {
         display: grid;
-        gap: 8px;
-        margin-bottom: 18px;
+        grid-template-columns: 210px minmax(0, 1fr);
+        gap: 0;
+        align-items: start;
+        margin-bottom: 8px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        overflow: hidden;
       }
 
       .favorites-head {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 28px;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 8px;
         min-width: 0;
+        min-height: 28px;
+        height: 100%;
+        border-right: 1px solid var(--line);
+        background: var(--surface-muted);
+        padding: 8px 10px;
       }
 
       .favorites-title-wrap {
@@ -420,33 +432,75 @@
 
       .favorites-title {
         margin: 0;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 13px;
+        font-weight: 700;
         line-height: 1.35;
-        color: var(--muted);
+        color: var(--ink);
       }
 
       .favorites-section .link-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        border-color: var(--line-strong);
       }
 
       .group-section {
-        border-top: 1px solid var(--line);
-        padding-top: 12px;
+        display: grid;
+        grid-template-columns: 210px minmax(0, 1fr);
+        gap: 0;
+        align-items: start;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        overflow: hidden;
         min-width: 0;
       }
 
       .group-section.collapsed {
-        padding-bottom: 4px;
+        background: var(--surface-muted);
+      }
+
+      .group-section.collapsed .group-head {
+        min-height: 20px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+      }
+
+      .group-section.collapsed .group-title-wrap {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .group-section.collapsed .group-title {
+        font-size: 12px;
+        line-height: 1.15;
+      }
+
+      .group-section.collapsed .count {
+        font-size: 11px;
+        line-height: 1;
+      }
+
+      .group-section.collapsed .group-toggle {
+        width: 14px;
+        height: 14px;
+      }
+
+      .group-section.collapsed .group-toggle svg {
+        width: 11px;
+        height: 11px;
       }
 
       .group-head {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 28px;
         align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        min-height: 32px;
-        margin-bottom: 9px;
+        justify-content: flex-start;
+        gap: 7px;
+        min-height: 28px;
+        height: 100%;
+        margin-bottom: 0;
+        border-right: 1px solid var(--line);
+        background: var(--surface-muted);
+        padding: 8px 10px;
       }
 
       .group-section.collapsed .group-head {
@@ -455,9 +509,11 @@
 
       .group-title {
         margin: 0;
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 13px;
+        font-weight: 700;
         line-height: 1.35;
+        overflow-wrap: anywhere;
+        white-space: normal;
       }
 
       .group-title-area {
@@ -465,6 +521,7 @@
         align-items: center;
         gap: 4px;
         min-width: 0;
+        max-width: 100%;
       }
 
       .group-title-wrap {
@@ -473,21 +530,22 @@
         border-radius: 5px;
         background: transparent;
         color: var(--ink);
-        padding: 3px 6px 3px 2px;
+        padding: 3px 4px 3px 0;
         display: inline-flex;
         align-items: center;
         gap: 6px;
         min-width: 0;
+        max-width: 100%;
         cursor: pointer;
       }
 
       .group-title-wrap:hover {
-        background: var(--surface-muted);
+        background: #ededeb;
       }
 
       .group-add {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
         border: 0;
         border-radius: 5px;
         background: transparent;
@@ -496,14 +554,29 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
-        line-height: 1;
+        position: relative;
+        font-size: 0;
+        line-height: 0;
+        padding: 0;
         opacity: 0;
         pointer-events: none;
         transition:
           opacity 120ms ease,
           background 120ms ease,
           color 120ms ease;
+      }
+
+      .group-add::before {
+        content: "+";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        line-height: 1;
+        font-weight: 500;
+        transform: translateY(-2px);
       }
 
       .group-section:hover .group-add,
@@ -539,14 +612,21 @@
 
       /* 全リンク（All）はグループ群と区切って下部に置き、横幅いっぱいに使う */
       .group-section--all {
-        border-top: 1px solid var(--line-strong);
-        margin-top: 8px;
-        grid-column: 1 / -1;
+        border-color: var(--line-strong);
+        margin-top: 6px;
+      }
+
+      .group-section--all .group-head {
+        background: var(--surface);
       }
 
       .count {
         color: var(--muted);
         font-size: 12px;
+        line-height: 1;
+        align-self: center;
+        justify-self: end;
+        text-align: right;
         font-family:
           ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono",
           Menlo, monospace;
@@ -560,9 +640,11 @@
       }
 
       .link-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 7px;
+        align-items: flex-start;
+        padding: 8px 10px;
       }
 
       .link-grid[hidden] {
@@ -570,20 +652,30 @@
       }
 
       .link-button {
-        width: 100%;
-        min-height: 38px;
+        width: auto;
+        max-width: 100%;
+        min-height: 28px;
         border: 1px solid var(--line);
-        border-radius: var(--radius);
+        border-radius: 4px;
         background: var(--surface);
-        padding: 8px 10px;
+        padding: 4px 7px;
         text-align: left;
         cursor: pointer;
         overflow: hidden;
+        display: grid;
+        grid-template-columns: 14px minmax(0, 1fr);
+        gap: 6px;
+        align-items: center;
         transition:
           background 120ms ease,
-          border-color 120ms ease;
-        font-size: 14px;
+          border-color 120ms ease,
+          color 120ms ease;
+        font-size: 13px;
         font-weight: 500;
+      }
+
+      .link-button:last-child {
+        border-bottom: 1px solid var(--line);
       }
 
       .link-button:hover {
@@ -591,23 +683,71 @@
         border-color: var(--line-strong);
       }
 
-      .board-link-content {
+      .board-link-icon {
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          border-color 120ms ease,
+          color 120ms ease,
+          background 120ms ease;
+      }
+
+      .board-link-icon svg {
+        width: 9px;
+        height: 9px;
         display: block;
+      }
+
+      .link-button:hover .board-link-icon {
+        background: var(--surface);
+        border-color: var(--line-strong);
+        color: var(--ink);
+      }
+
+      .board-link-content {
+        display: flex;
+        align-items: center;
+        gap: 5px;
         min-width: 0;
       }
 
       .board-link-title {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
-        overflow: hidden;
-        overflow-wrap: anywhere;
-        line-height: 1.35;
+        display: block;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: nowrap;
+        line-height: 1.3;
+      }
+
+      .board-link-pin {
+        width: 14px;
+        height: 14px;
+        flex: 0 0 auto;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .board-link-pin svg {
+        width: 9px;
+        height: 9px;
+        display: block;
       }
 
       .list {
-        --list-columns: minmax(0, 1.2fr) minmax(0, 1.25fr) 120px minmax(0, 160px) 214px;
+        --list-columns: 42px minmax(0, 1.2fr) minmax(0, 1.25fr) 120px
+          minmax(0, 160px) 214px;
       }
 
       .list-head {
@@ -620,7 +760,6 @@
         color: var(--muted);
         font-size: 11px;
         font-weight: 600;
-        text-transform: uppercase;
       }
 
       .list-head > div:last-child {
@@ -631,10 +770,19 @@
         display: grid;
         grid-template-columns: var(--list-columns);
         gap: 14px;
-        align-items: start;
+        align-items: center;
         padding: 13px 0;
         border-top: 1px solid var(--line);
         min-width: 0;
+      }
+
+      .row-index {
+        color: var(--muted);
+        font-size: 12px;
+        font-family:
+          ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono",
+          Menlo, monospace;
+        line-height: 1.4;
       }
 
       .row-title {
@@ -726,7 +874,8 @@
         display: flex;
         flex-wrap: wrap;
         gap: 4px;
-        align-content: start;
+        align-content: center;
+        align-items: center;
         overflow: hidden;
       }
 
@@ -747,12 +896,53 @@
       .row-actions {
         min-width: 0;
         display: flex;
+        align-items: center;
         justify-content: flex-end;
-        gap: 6px;
+        gap: 10px;
       }
 
-      .row-actions .button:first-child {
-        min-width: 72px;
+      .row-action {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        padding: 2px 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.3;
+        transition: color 120ms ease;
+      }
+
+      .row-action:hover {
+        color: var(--ink);
+      }
+
+      .row-action.danger:hover {
+        color: var(--danger);
+      }
+
+      .row-action.active {
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .row-action-icon {
+        width: 14px;
+        height: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+      }
+
+      .row-action-icon svg {
+        width: 14px;
+        height: 14px;
+        display: block;
       }
 
       .summary {
@@ -1211,6 +1401,12 @@
           grid-template-columns: 1fr;
         }
 
+        .favorites-section,
+        .group-section {
+          grid-template-columns: 180px minmax(0, 1fr);
+          gap: 10px;
+        }
+
         .row {
           grid-template-columns: minmax(0, 1fr);
           gap: 7px;
@@ -1267,6 +1463,22 @@
 
         .link-grid {
           grid-template-columns: 1fr;
+        }
+
+        .favorites-section,
+        .group-section {
+          grid-template-columns: 1fr;
+        }
+
+        .favorites-head,
+        .group-head {
+          min-height: 0;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .link-button {
+          grid-template-columns: 14px minmax(0, 1fr);
         }
       }
     </style>
@@ -1356,7 +1568,12 @@
             aria-pressed="true"
           >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path
+                d="M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
             </svg>
             <span>Board</span>
           </button>
@@ -1367,7 +1584,12 @@
             aria-pressed="false"
           >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M8 6h11M8 12h11M8 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+              <path
+                d="M8 6h11M8 12h11M8 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"
+                stroke="currentColor"
+                stroke-width="1.9"
+                stroke-linecap="round"
+              />
             </svg>
             <span>List</span>
           </button>
@@ -1465,7 +1687,7 @@
               id="titleInput"
               name="title"
               type="text"
-              placeholder="例: 基本設計書"
+              placeholder="例） 基本設計書"
               required
             />
           </div>
@@ -1506,7 +1728,7 @@
             <textarea
               id="noteInput"
               name="note"
-              placeholder="必要なときだけ補足"
+              placeholder="メモを入力"
             ></textarea>
           </div>
           <div class="dialog-actions">
@@ -1545,7 +1767,7 @@
               <input
                 id="newGroupInput"
                 type="text"
-                placeholder="例: 移行工程"
+                placeholder="例） 移行工程"
               />
             </div>
             <button class="button primary" type="submit">Add</button>
@@ -2359,10 +2581,12 @@
           usage.set(group, (usage.get(group) || 0) + 1);
         });
 
-      // 未所属は改名も削除もできないため、グループ管理には出さない
-      const displayGroups = state.groups.filter((group) => group !== NO_GROUP);
+        // 未所属は改名も削除もできないため、グループ管理には出さない
+        const displayGroups = state.groups.filter(
+          (group) => group !== NO_GROUP,
+        );
 
-      displayGroups.forEach((group) => {
+        displayGroups.forEach((group) => {
           const item = document.createElement("div");
           item.className = "group-item";
           const count = usage.get(group) || 0;
@@ -2497,7 +2721,7 @@
 
         const count = document.createElement("span");
         count.className = "count";
-        count.textContent = `${pinnedLinks.length} ${pinnedLinks.length === 1 ? "link" : "links"}`;
+        count.textContent = String(pinnedLinks.length);
 
         head.append(titleWrap, count);
 
@@ -2559,7 +2783,7 @@
         }
         const count = document.createElement("span");
         count.className = "count";
-        count.textContent = `${groupLinks.length} ${groupLinks.length === 1 ? "link" : "links"}`;
+        count.textContent = String(groupLinks.length);
         head.append(titleArea, count);
 
         const grid = document.createElement("div");
@@ -2579,6 +2803,12 @@
         button.className = "link-button";
         button.title = `${link.title}\n${link.url}`;
 
+        const icon = document.createElement("span");
+        icon.className = "board-link-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.innerHTML =
+          '<svg viewBox="0 0 16 16" fill="none"><path d="M6 4.5h5.5V10M11.2 4.8 4.5 11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
         const content = document.createElement("span");
         content.className = "board-link-content";
 
@@ -2587,7 +2817,17 @@
         appendHighlighted(title, link.title);
         content.append(title);
 
-        button.append(content);
+        if (link.pinned) {
+          const pin = document.createElement("span");
+          pin.className = "board-link-pin";
+          pin.title = "Pinned";
+          pin.setAttribute("aria-label", "Pinned");
+          pin.innerHTML =
+            '<svg viewBox="0 0 16 16" fill="none"><path d="M9.6 1.8 14.2 6.4 12.7 7.9 11.4 7.4 8.9 9.9 9.1 12.3 8.4 13 5.4 10 2.2 13.2 1.6 12.6 4.8 9.4 1.8 6.4 2.5 5.7 4.9 5.9 7.4 3.4 6.9 2.1 8.4.6 9.6 1.8Z" fill="currentColor"/></svg>';
+          content.append(pin);
+        }
+
+        button.append(icon, content);
         button.addEventListener("click", () => openLink(link));
         return button;
       }
@@ -2615,15 +2855,19 @@
         list.className = "list";
         const head = document.createElement("div");
         head.className = "list-head";
-        ["Title", "URL", "Group", "Tags", "Actions"].forEach((label) => {
+        ["#", "Title", "URL", "Group", "Tags", "Actions"].forEach((label) => {
           const cell = document.createElement("div");
           cell.textContent = label;
           head.append(cell);
         });
         list.append(head);
-        links.forEach((link) => {
+        links.forEach((link, index) => {
           const row = document.createElement("article");
           row.className = "row";
+
+          const rowIndex = document.createElement("div");
+          rowIndex.className = "row-index";
+          rowIndex.textContent = String(index + 1).padStart(2, "0");
 
           const title = document.createElement("div");
           title.className = "row-title";
@@ -2671,25 +2915,56 @@
           actions.className = "row-actions";
           actions.append(
             pinToggleButton(link),
-            smallButton("Edit", () => openModal(link)),
-            smallButton("Delete", () => deleteLink(link.id), "danger"),
+            rowActionButton("Edit", "edit", () => openModal(link)),
+            rowActionButton(
+              "Delete",
+              "delete",
+              () => deleteLink(link.id),
+              "danger",
+            ),
           );
 
-          row.append(title, url, group, tags, actions);
+          row.append(rowIndex, title, url, group, tags, actions);
           list.append(row);
         });
         els.listView.append(list);
       }
 
       function pinToggleButton(link) {
-        const button = smallButton(
+        const button = rowActionButton(
           link.pinned ? "Pinned" : "Pin",
+          "pin",
           () => togglePin(link.id),
-          `pin-action${link.pinned ? " active" : ""}`,
+          link.pinned ? "active" : "",
         );
         button.title = link.pinned ? "Pinnedから外す" : "Pinnedに追加";
         button.setAttribute("aria-pressed", String(link.pinned));
         return button;
+      }
+
+      function rowActionButton(label, iconName, action, variant = "") {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `row-action ${variant}`.trim();
+        const icon = document.createElement("span");
+        icon.className = "row-action-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.innerHTML = rowActionIcon(iconName);
+        const text = document.createElement("span");
+        text.textContent = label;
+        button.append(icon, text);
+        button.addEventListener("click", action);
+        return button;
+      }
+
+      function rowActionIcon(name) {
+        if (name === "edit") {
+          return '<svg viewBox="0 0 16 16" fill="none"><path d="M3.2 11.9 3 14l2.1-.2 7-7-1.9-1.9-7 7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="m9.5 3.6.8-.8a1.3 1.3 0 0 1 1.9 0l1 1a1.3 1.3 0 0 1 0 1.9l-.8.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+        }
+        if (name === "delete") {
+          return '<svg viewBox="0 0 16 16" fill="none"><path d="M3 4.2h10M6.2 4.2V3a1 1 0 0 1 1-1h1.6a1 1 0 0 1 1 1v1.2M5 6v6.2A1.8 1.8 0 0 0 6.8 14h2.4a1.8 1.8 0 0 0 1.8-1.8V6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+        }
+        return '<svg viewBox="0 0 16 16" fill="none"><path d="M9.6 1.8 14.2 6.4 12.7 7.9 11.4 7.4 8.9 9.9 9.1 12.3 8.4 13 5.4 10 2.2 13.2 1.6 12.6 4.8 9.4 1.8 6.4 2.5 5.7 4.9 5.9 7.4 3.4 6.9 2.1 8.4.6 9.6 1.8Z" fill="currentColor"/></svg>';
       }
 
       function smallButton(label, action, variant = "") {
@@ -2878,7 +3153,9 @@
           els.urlInput.value = link?.url || "";
           els.titleInput.value = link?.title || "";
           const sourceGroup =
-            link || defaults.group ? cleanGroup(link?.group || defaults.group) : "";
+            link || defaults.group
+              ? cleanGroup(link?.group || defaults.group)
+              : "";
           els.groupInput.value = sourceGroup === NO_GROUP ? "" : sourceGroup;
           state.formTags = [...(link?.tags || [])];
           els.noteInput.value = link?.note || "";
@@ -3376,13 +3653,17 @@
       // パス/クエリ値から、表示に使える最後のセグメント(ファイル名・フォルダ名)を取り出す。
       // SharePoint の Forms/AllItems.aspx のような定型セグメントは飛ばし、拡張子は落とす。
       function lastMeaningfulSegment(value) {
-        const path = String(value || "").split("?")[0].split("#")[0];
+        const path = String(value || "")
+          .split("?")[0]
+          .split("#")[0];
         const segments = path
           .split("/")
           .map(safeDecode)
           .map((segment) => segment.trim())
           .filter(Boolean)
-          .filter((segment) => !TITLE_NOISE_SEGMENTS.has(segment.toLowerCase()));
+          .filter(
+            (segment) => !TITLE_NOISE_SEGMENTS.has(segment.toLowerCase()),
+          );
         const last = segments.pop() || "";
         return last.replace(TITLE_EXTENSION_RE, "");
       }
