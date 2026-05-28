@@ -1309,28 +1309,6 @@
         border-top: 1px solid var(--line);
       }
 
-      .group-next-action {
-        display: none;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        background: var(--surface-muted);
-        padding: 10px 11px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-
-      .group-next-action.open {
-        display: flex;
-      }
-
-      .group-next-action strong {
-        color: var(--ink);
-        font-weight: 600;
-      }
-
       .group-item {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto auto;
@@ -2321,15 +2299,6 @@
             </div>
             <button class="button primary" type="submit">Add</button>
           </form>
-          <div class="group-next-action" id="groupNextAction">
-            <span
-              ><strong id="groupNextName"></strong>
-              にリンクを追加しますか？</span
-            >
-            <button class="button primary" id="groupNextButton" type="button">
-              Add Link
-            </button>
-          </div>
           <div class="hint">
             ここで追加したグループは、リンク登録時のGroup候補とBoardの並びに反映されます。
           </div>
@@ -2817,7 +2786,6 @@
         editingGroup: null,
         pendingImport: null,
         copiedLinkId: null,
-        pendingGroupLink: null,
         formLoadedFor: null,
         quickAddOpen: false,
         quickAutoTitle: "",
@@ -2860,9 +2828,6 @@
         closeHelpButton: document.querySelector("#closeHelpButton"),
         groupForm: document.querySelector("#groupForm"),
         newGroupInput: document.querySelector("#newGroupInput"),
-        groupNextAction: document.querySelector("#groupNextAction"),
-        groupNextName: document.querySelector("#groupNextName"),
-        groupNextButton: document.querySelector("#groupNextButton"),
         groupList: document.querySelector("#groupList"),
         exportButton: document.querySelector("#exportButton"),
         importButton: document.querySelector("#importButton"),
@@ -3084,8 +3049,11 @@
       function renderStats(filtered) {
         const total = state.links.length;
         const shown = filtered.length;
+        // Board にセクション化されない未所属(no group)は数えない
         const groups = new Set(
-          state.links.map((link) => cleanGroup(link.group)),
+          state.links
+            .map((link) => cleanGroup(link.group))
+            .filter((group) => group !== NO_GROUP),
         ).size;
         els.stats.textContent = `${shown}/${total} links · ${groups} groups`;
       }
@@ -4552,6 +4520,23 @@
         };
       }
 
+      // 単一の URL らしい文字列か（スキームあり、またはスキームなしのホスト形）。
+      // 空白を含む通常の文章は URL とみなさない。
+      function looksLikeUrl(text) {
+        const value = String(text || "").trim();
+        if (!value || /\s/.test(value)) return false;
+        if (/^https?:\/\//i.test(value)) return true;
+        return /^[a-z0-9-]+(\.[a-z0-9-]+)+(?:[/:?#]|$)/i.test(value);
+      }
+
+      // クリップボードに URL が含まれるか（HTML リンク or URL らしいプレーンテキスト）。
+      function clipboardHasUrl(clipboardData) {
+        if (!clipboardData) return false;
+        if (parseHtmlLink(clipboardData.getData("text/html") || "")?.url)
+          return true;
+        return looksLikeUrl(clipboardData.getData("text/plain") || "");
+      }
+
       // SharePoint の定型ページ名など、title として無意味なパスセグメント。
       const TITLE_NOISE_SEGMENTS = new Set([
         "forms",
@@ -4874,7 +4859,7 @@
       });
       els.tagsInput.addEventListener("blur", () => {
         setTimeout(() => {
-          addFormTag(els.tagsInput.value);
+          addFormTag(els.tagsInput.value, false);
           state.tagMenuOpen = false;
           renderTagSelect();
         }, 120);
@@ -4938,11 +4923,12 @@
       });
 
       // ボード上で URL を貼り付け(Cmd/Ctrl+V)＝クイック追加バーを起動して取り込む。
-      // 入力中・モーダル中・バー表示中は通常の貼り付けに任せる。
+      // 入力中・モーダル中・バー表示中、および URL でない貼り付けは通常動作に任せる。
       document.addEventListener("paste", (event) => {
         const activeTag = document.activeElement?.tagName;
         const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(activeTag);
         if (isTyping || isAnyModalOpen() || state.quickAddOpen) return;
+        if (!clipboardHasUrl(event.clipboardData)) return;
         event.preventDefault();
         openQuickAdd(event.clipboardData);
       });
@@ -5013,6 +4999,8 @@
 
         if (isTyping) return;
         if (isAnyModalOpen() || state.quickAddOpen) return;
+        // ブラウザのショートカット(Ctrl+N 等)を奪わない。? は Shift+/ なので Shift は許可。
+        if (event.metaKey || event.ctrlKey || event.altKey) return;
 
         if (event.key === "/") {
           event.preventDefault();
