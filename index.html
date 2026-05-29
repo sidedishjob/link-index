@@ -4425,9 +4425,9 @@
       }
 
       function clearData() {
-        if (!confirm("すべてのリンクを削除しますか？")) return;
+        if (!confirm("すべてのリンクとグループを削除しますか？")) return;
         state.links = [];
-        state.groups = [...DEFAULT_GROUPS];
+        state.groups = [];
         state.collapsedGroups = [];
         persist();
         closeDataModal();
