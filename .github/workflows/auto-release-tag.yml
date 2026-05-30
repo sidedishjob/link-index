@@ -1,0 +1,49 @@
+name: Auto Release Tag
+
+on:
+    pull_request:
+        types: [closed]
+        branches: [main]
+
+jobs:
+    release:
+        if: >-
+            github.event.pull_request.merged == true &&
+            startsWith(github.event.pull_request.title, 'release: v')
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Extract version from PR title
+              id: version
+              env:
+                  TITLE: ${{ github.event.pull_request.title }}
+              run: |
+                  VERSION="${TITLE#release: }"
+                  echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+
+            - name: Checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+            - name: Create and push tag
+              env:
+                  TAG: ${{ steps.version.outputs.tag }}
+                  SHA: ${{ github.event.pull_request.merge_commit_sha }}
+              run: |
+                  if git ls-remote --tags origin | grep -qF "refs/tags/${TAG}"; then
+                    echo "Tag ${TAG} already exists, skipping"
+                  else
+                    git tag "${TAG}" "${SHA}"
+                    git push origin "${TAG}"
+                  fi
+
+            - name: Create GitHub Release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  TAG: ${{ steps.version.outputs.tag }}
+              run: |
+                  gh release create "${TAG}" \
+                    --title "${TAG}" \
+                    --generate-notes
