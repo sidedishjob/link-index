@@ -2000,7 +2000,7 @@
               class="button icon ghost"
               id="settingsButton"
               type="button"
-              aria-label="設定"
+              aria-label="Settings"
               aria-expanded="false"
               title="Settings"
             >
@@ -2255,7 +2255,9 @@
             <button class="button" id="cancelButton" type="button">
               Cancel
             </button>
-            <button class="button primary" type="submit">Save</button>
+            <button class="button primary" type="submit">
+              <span>Save</span>
+            </button>
           </div>
         </form>
       </div>
@@ -2297,7 +2299,9 @@
                 placeholder="例） 移行工程"
               />
             </div>
-            <button class="button primary" type="submit">Add</button>
+            <button class="button primary" type="submit">
+              <span>Add</span>
+            </button>
           </form>
           <div class="hint">
             ここで追加したグループは、リンク登録時のGroup候補とBoardの並びに反映されます。
@@ -2406,9 +2410,7 @@
     >
       <div class="dialog">
         <div class="dialog-head">
-          <h2 class="dialog-title" id="helpModalTitle">
-            使い方とショートカット
-          </h2>
+          <h2 class="dialog-title" id="helpModalTitle">Help</h2>
           <button
             class="button icon ghost"
             id="closeHelpButton"
@@ -2478,8 +2480,8 @@
                 <dd>クイック追加バー / モーダル / メニューを閉じる</dd>
               </div>
               <div class="help-key-row">
-                <dt><kbd>Enter</kbd></dt>
-                <dd>フォーム入力中に保存</dd>
+                <dt><kbd>⌘/Ctrl</kbd><kbd>Enter</kbd></dt>
+                <dd>リンク / グループの追加・編集フォームで登録</dd>
               </div>
             </dl>
             <p class="help-note">
@@ -2590,11 +2592,11 @@
               id="quickDetailsButton"
               type="button"
             >
-              詳細
+              Details
               <kbd class="qa-key">→</kbd>
             </button>
             <button class="quick-add-submit" type="submit">
-              追加
+              Add
               <kbd class="qa-key qa-key-invert">↵</kbd>
             </button>
           </div>
@@ -4706,8 +4708,26 @@
       });
       els.closeHelpButton.addEventListener("click", closeHelpModal);
       els.cancelButton.addEventListener("click", closeModal);
+      // 登録系フォームは ⌘/Ctrl+Enter のみで送信し、素の Enter では送信しない。
+      // （高速入力は Quick Add バーが担うため、詳細フォームは意図的な操作に統一）
+      function enableCmdEnterSubmit(form) {
+        form.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          if (event.metaKey || event.ctrlKey) {
+            event.preventDefault();
+            form.requestSubmit();
+            return;
+          }
+          if (event.target.tagName === "INPUT") {
+            event.preventDefault();
+          }
+        });
+      }
+
       els.linkForm.addEventListener("submit", saveForm);
+      enableCmdEnterSubmit(els.linkForm);
       els.groupForm.addEventListener("submit", saveGroup);
+      enableCmdEnterSubmit(els.groupForm);
       els.urlInput.addEventListener("input", handleUrlInput);
       els.urlInput.addEventListener("paste", handleUrlPaste);
       els.quickAddForm.addEventListener("submit", saveQuick);
