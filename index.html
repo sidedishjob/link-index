@@ -4173,10 +4173,9 @@
         state.groups = getUniqueGroups([...state.groups, group]);
         els.groupForm.reset();
         persist();
-        closeGroupsModal();
         render();
         showToast("グループを追加しました");
-        openModal(null, { group });
+        els.newGroupInput.focus();
       }
 
       function startGroupRename(group) {
