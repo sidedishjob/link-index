@@ -32,7 +32,7 @@ jobs:
                   TAG: ${{ steps.version.outputs.tag }}
                   SHA: ${{ github.event.pull_request.merge_commit_sha }}
               run: |
-                  if git ls-remote --tags origin | grep -qF "refs/tags/${TAG}"; then
+                  if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
                     echo "Tag ${TAG} already exists, skipping"
                   else
                     git tag "${TAG}" "${SHA}"
