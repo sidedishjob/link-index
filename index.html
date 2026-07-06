@@ -2868,9 +2868,11 @@
           state.links = Array.isArray(parsed.links)
             ? parsed.links.map(normalizeLink)
             : [];
+          const savedGroups = Array.isArray(parsed.groups)
+            ? parsed.groups
+            : DEFAULT_GROUPS;
           state.groups = getUniqueGroups([
-            ...DEFAULT_GROUPS,
-            ...(Array.isArray(parsed.groups) ? parsed.groups : []),
+            ...savedGroups,
             ...state.links.map((link) => link.group),
           ]);
           state.collapsedGroups = Array.isArray(parsed.collapsedGroups)
@@ -4337,7 +4339,6 @@
         if (mode === "replace") {
           state.links = imported;
           state.groups = getUniqueGroups([
-            ...DEFAULT_GROUPS,
             ...importedGroups,
             ...imported.map((link) => link.group),
           ]);
