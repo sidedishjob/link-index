@@ -4531,10 +4531,11 @@
           ]);
         } else {
           const existingUrls = new Set(state.links.map((link) => link.url));
-          state.links = [
-            ...state.links,
-            ...imported.filter((link) => !existingUrls.has(link.url)),
-          ];
+          const merged = imported
+            .filter((link) => !existingUrls.has(link.url))
+            .map((link) => ({ ...link }));
+          remapMergedOrder(merged);
+          state.links = [...state.links, ...merged];
           state.groups = getUniqueGroups([
             ...state.groups,
             ...importedGroups,
@@ -4550,6 +4551,56 @@
           mode === "replace"
             ? "データを置換しました"
             : "データをマージしました",
+        );
+      }
+
+      // マージ分の順序値を、既存の末尾に続く連番へ振り直す（merged を直接書き換える）。
+      // 既存の手動順に割り込ませず、かつ Clear All 後の復元や空グループへのマージでは
+      // エクスポート時の相対順をそのまま再現するためのオフセット方式
+      function remapMergedOrder(merged) {
+        const orderedGroups = new Set(
+          merged
+            .filter((link) => typeof link.order === "number")
+            .map((link) => link.group),
+        );
+        for (const group of orderedGroups) {
+          const base = nextRank(
+            state.links.filter((link) => link.group === group),
+            "order",
+          );
+          merged
+            .filter(
+              (link) => link.group === group && typeof link.order === "number",
+            )
+            .sort((a, b) => a.order - b.order)
+            .forEach((link, index) => {
+              link.order = base + index;
+            });
+        }
+
+        const pinnedBase = nextRank(
+          state.links.filter((link) => link.pinned),
+          "pinnedOrder",
+        );
+        merged
+          .filter((link) => link.pinned && typeof link.pinnedOrder === "number")
+          .sort((a, b) => a.pinnedOrder - b.pinnedOrder)
+          .forEach((link, index) => {
+            link.pinnedOrder = pinnedBase + index;
+          });
+        for (const link of merged) {
+          // ピンされていないリンクの pinnedOrder は再ピン時の割り込み防止のため破棄
+          if (!link.pinned) link.pinnedOrder = undefined;
+        }
+      }
+
+      function nextRank(links, field) {
+        return links.reduce(
+          (max, link) =>
+            typeof link[field] === "number"
+              ? Math.max(max, link[field] + 1)
+              : max,
+          0,
         );
       }
 
