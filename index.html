@@ -4531,9 +4531,17 @@
           ]);
         } else {
           const existingUrls = new Set(state.links.map((link) => link.url));
+          // マージでは持ち込みの順序値を破棄する。既存の手動順に割り込ませず、
+          // 「未設定は末尾」のルールでグループ末尾・Pinned 末尾に並べるため
           state.links = [
             ...state.links,
-            ...imported.filter((link) => !existingUrls.has(link.url)),
+            ...imported
+              .filter((link) => !existingUrls.has(link.url))
+              .map((link) => ({
+                ...link,
+                order: undefined,
+                pinnedOrder: undefined,
+              })),
           ];
           state.groups = getUniqueGroups([
             ...state.groups,
