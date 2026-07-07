@@ -730,17 +730,20 @@
         border-color: var(--line-strong);
       }
 
+      .link-button.dragging {
+        opacity: 0.4;
+        border-style: dashed;
+      }
+
       .board-link-icon {
         width: 14px;
         height: 14px;
-        border: 1px solid var(--line);
         border-radius: 4px;
         color: var(--muted);
         display: inline-flex;
         align-items: center;
         justify-content: center;
         transition:
-          border-color 120ms ease,
           color 120ms ease,
           background 120ms ease;
       }
@@ -753,7 +756,6 @@
 
       .link-button:hover .board-link-icon {
         background: var(--surface);
-        border-color: var(--line-strong);
         color: var(--ink);
       }
 
@@ -1311,11 +1313,35 @@
 
       .group-item {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
         gap: 12px;
         align-items: center;
         min-height: 44px;
         border-bottom: 1px solid var(--line);
+      }
+
+      .group-item.dragging {
+        opacity: 0.4;
+      }
+
+      .group-drag-handle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 28px;
+        color: var(--muted);
+        cursor: grab;
+      }
+
+      .group-drag-handle:active {
+        cursor: grabbing;
+      }
+
+      .group-drag-handle svg {
+        width: 14px;
+        height: 14px;
+        display: block;
       }
 
       .group-name {
@@ -2923,10 +2949,19 @@
           createdAt: Number(link.createdAt) || Date.now(),
           updatedAt: link.updatedAt ? Number(link.updatedAt) : undefined,
           pinned: Boolean(link.pinned),
+          order: normalizeOrder(link.order),
+          pinnedOrder: normalizeOrder(link.pinnedOrder),
           lastOpenedAt: link.lastOpenedAt
             ? Number(link.lastOpenedAt)
             : undefined,
         };
+      }
+
+      // 並び順は 0 始まりの整数のみ有効。未設定（undefined）は末尾扱い
+      function normalizeOrder(value) {
+        return typeof value === "number" && Number.isFinite(value)
+          ? value
+          : undefined;
       }
 
       function normalizeUrl(value) {
@@ -2983,11 +3018,42 @@
               .toLowerCase();
             return terms.every((term) => haystack.includes(term));
           })
-          .sort(
-            (a, b) =>
-              a.group.localeCompare(b.group, "ja") ||
-              a.title.localeCompare(b.title, "ja"),
+          .sort(compareLinks);
+      }
+
+      // グループは state.groups の並び順、グループ内は手動順（order）優先。
+      // order 未設定のリンクはグループ末尾にタイトル五十音順で並ぶ。
+      // 未分類は Inbox 扱い: 常に先頭に置き、仮登録をすぐ見つけて整理できるよう新しい順にする
+      function compareLinks(a, b) {
+        return (
+          groupSortRank(a.group) - groupSortRank(b.group) ||
+          a.group.localeCompare(b.group, "ja") ||
+          // 未分類はグループ削除等で持ち込まれた order を無視し、常に新しい順を保つ
+          (a.group === NO_GROUP ? 0 : compareOrder(a.order, b.order)) ||
+          compareFallback(a, b)
+        );
+      }
+
+      function groupSortRank(group) {
+        if (group === NO_GROUP) return -1;
+        const index = state.groups.indexOf(group);
+        return index === -1 ? state.groups.length : index;
+      }
+
+      function compareFallback(a, b) {
+        if (a.group === NO_GROUP) {
+          return (
+            b.createdAt - a.createdAt || a.title.localeCompare(b.title, "ja")
           );
+        }
+        return a.title.localeCompare(b.title, "ja");
+      }
+
+      function compareOrder(a, b) {
+        const rankA = typeof a === "number" ? a : Infinity;
+        const rankB = typeof b === "number" ? b : Infinity;
+        if (rankA === rankB) return 0;
+        return rankA < rankB ? -1 : 1;
       }
 
       function appendHighlighted(parent, text) {
@@ -3340,8 +3406,36 @@
         displayGroups.forEach((group) => {
           const item = document.createElement("div");
           item.className = "group-item";
+          item.dataset.group = group;
           const count = usage.get(group) || 0;
           const inUse = count > 0;
+
+          // ハンドル押下時のみ行をドラッグ可能にする（名前クリックのリネームと共存させるため）
+          const handle = document.createElement("span");
+          handle.className = "group-drag-handle";
+          handle.title = "ドラッグで並び替え";
+          handle.setAttribute("aria-hidden", "true");
+          handle.innerHTML =
+            '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="6" cy="4" r="1.2"/><circle cx="10" cy="4" r="1.2"/><circle cx="6" cy="8" r="1.2"/><circle cx="10" cy="8" r="1.2"/><circle cx="6" cy="12" r="1.2"/><circle cx="10" cy="12" r="1.2"/></svg>';
+          handle.addEventListener("mousedown", () => {
+            item.draggable = true;
+          });
+          handle.addEventListener("mouseup", () => {
+            item.draggable = false;
+          });
+          item.addEventListener("dragstart", (event) => {
+            dragGroupRow = { el: item, dropped: false };
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", group);
+            requestAnimationFrame(() => item.classList.add("dragging"));
+          });
+          item.addEventListener("dragend", () => {
+            item.classList.remove("dragging");
+            item.draggable = false;
+            const dropped = dragGroupRow && dragGroupRow.dropped;
+            dragGroupRow = null;
+            if (!dropped) renderGroupList();
+          });
 
           let name;
           if (state.editingGroup === group) {
@@ -3402,9 +3496,22 @@
             : "グループを削除";
           actions.append(remove);
 
-          item.append(name, meta, actions);
+          item.append(handle, name, meta, actions);
           els.groupList.append(item);
         });
+      }
+
+      // --- グループ行のドラッグ&ドロップ並び替え ---
+      let dragGroupRow = null;
+
+      function commitGroupOrder() {
+        const ordered = [...els.groupList.querySelectorAll(".group-item")].map(
+          (item) => item.dataset.group,
+        );
+        // 表示中の行の新しい並びを先頭に置き、モーダルに出ない no group などは末尾に残す
+        state.groups = getUniqueGroups([...ordered, ...state.groups]);
+        persist();
+        render();
       }
 
       function renderBoard(links) {
@@ -3422,7 +3529,10 @@
             .filter((group) => !state.groups.includes(group))
             .sort((a, b) => a.localeCompare(b, "ja")),
         ].filter((group) => group !== NO_GROUP);
-        const pinnedLinks = links.filter((link) => link.pinned);
+        // Pinned 内は pinnedOrder の手動順（未設定は元の並びのまま末尾）
+        const pinnedLinks = links
+          .filter((link) => link.pinned)
+          .sort((a, b) => compareOrder(a.pinnedOrder, b.pinnedOrder));
         const favorites = renderFavorites(pinnedLinks);
         if (favorites) els.boardView.append(favorites);
 
@@ -3432,7 +3542,9 @@
         orderedGroups.forEach((group) => {
           const groupLinks = grouped[group];
           if (!groupLinks || !groupLinks.length) return;
-          appendBoardSection(board, group, groupLinks);
+          appendBoardSection(board, group, groupLinks, {
+            reorderField: "order",
+          });
         });
 
         // グループの下に全リンクを表示（所属の有無を問わず全件。グループ所属リンクは両方に出る）
@@ -3481,6 +3593,7 @@
         pinnedLinks.forEach((link) => {
           grid.append(createBoardLinkButton(link));
         });
+        enableGridReorder(grid, "pinnedOrder");
 
         section.append(head, grid);
         return section;
@@ -3493,6 +3606,7 @@
           label = group,
           showAdd = true,
           variant = "",
+          reorderField = null,
         } = options;
         const isCollapsed = state.collapsedGroups.includes(collapseKey);
         const section = document.createElement("section");
@@ -3543,6 +3657,7 @@
         groupLinks.forEach((link) => {
           grid.append(createBoardLinkButton(link));
         });
+        if (reorderField) enableGridReorder(grid, reorderField);
 
         section.append(head, grid);
         board.append(section);
@@ -3552,6 +3667,7 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "link-button";
+        button.dataset.id = link.id;
         button.title = `${link.title}\n${link.url}`;
 
         const icon = document.createElement("span");
@@ -3581,6 +3697,69 @@
         button.append(icon, content);
         button.addEventListener("click", () => openLink(link));
         return button;
+      }
+
+      // --- リンクカードのドラッグ&ドロップ並び替え ---
+      // 検索・タグ絞り込み中は一部のカードが非表示になり並び順を確定できないため無効化。
+      // All セクションはグループ横断のため対象外（enableGridReorder を呼ばない）
+      let dragCard = null;
+
+      function canReorderLinks() {
+        return !getQueryTerms().length && state.tag === "all";
+      }
+
+      function enableGridReorder(grid, field) {
+        if (!canReorderLinks()) return;
+        grid.querySelectorAll(".link-button").forEach((card) => {
+          card.draggable = true;
+          card.addEventListener("dragstart", (event) => {
+            dragCard = { el: card, grid, dropped: false };
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", card.dataset.id);
+            // dragstart 直後に見た目を変えるとドラッグ画像まで薄くなるため 1 フレーム遅らせる
+            requestAnimationFrame(() => card.classList.add("dragging"));
+          });
+          card.addEventListener("dragend", () => {
+            card.classList.remove("dragging");
+            const dropped = dragCard && dragCard.dropped;
+            dragCard = null;
+            // ドロップせず離した場合は DOM を元の並びに戻す
+            if (!dropped) render();
+          });
+        });
+        grid.addEventListener("dragover", (event) => {
+          if (!dragCard || dragCard.grid !== grid) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+          const target = event.target.closest(".link-button");
+          if (!target || target === dragCard.el) return;
+          const rect = target.getBoundingClientRect();
+          const before = event.clientX < rect.left + rect.width / 2;
+          grid.insertBefore(
+            dragCard.el,
+            before ? target : target.nextElementSibling,
+          );
+        });
+        grid.addEventListener("drop", (event) => {
+          if (!dragCard || dragCard.grid !== grid) return;
+          event.preventDefault();
+          dragCard.dropped = true;
+          const ids = [...grid.querySelectorAll(".link-button")].map(
+            (card) => card.dataset.id,
+          );
+          commitLinkOrder(ids, field);
+        });
+      }
+
+      function commitLinkOrder(ids, field) {
+        const orderById = new Map(ids.map((id, index) => [id, index]));
+        state.links = state.links.map((link) =>
+          orderById.has(link.id)
+            ? { ...link, [field]: orderById.get(link.id) }
+            : link,
+        );
+        persist();
+        render();
       }
 
       function toggleGroup(group) {
@@ -3763,7 +3942,13 @@
       function togglePin(id) {
         state.links = state.links.map((link) =>
           link.id === id
-            ? { ...link, pinned: !link.pinned, updatedAt: Date.now() }
+            ? {
+                ...link,
+                pinned: !link.pinned,
+                // 解除時は手動順を破棄し、再ピン時に「未設定は末尾」のルールへ戻す
+                pinnedOrder: link.pinned ? undefined : link.pinnedOrder,
+                updatedAt: Date.now(),
+              }
             : link,
         );
         persist();
@@ -4143,11 +4328,13 @@
         }
 
         if (state.editingId) {
-          state.links = state.links.map((link) =>
-            link.id === state.editingId
-              ? { ...link, ...data, updatedAt: now }
-              : link,
-          );
+          state.links = state.links.map((link) => {
+            if (link.id !== state.editingId) return link;
+            const next = { ...link, ...data, updatedAt: now };
+            // グループが変わったら手動順をリセットし、移動先グループの末尾に置く
+            if (cleanGroup(link.group) !== data.group) next.order = undefined;
+            return next;
+          });
           showToast("リンクを更新しました");
         } else {
           state.links = [
@@ -4728,6 +4915,25 @@
       enableCmdEnterSubmit(els.linkForm);
       els.groupForm.addEventListener("submit", saveGroup);
       enableCmdEnterSubmit(els.groupForm);
+      els.groupList.addEventListener("dragover", (event) => {
+        if (!dragGroupRow) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        const target = event.target.closest(".group-item");
+        if (!target || target === dragGroupRow.el) return;
+        const rect = target.getBoundingClientRect();
+        const before = event.clientY < rect.top + rect.height / 2;
+        els.groupList.insertBefore(
+          dragGroupRow.el,
+          before ? target : target.nextElementSibling,
+        );
+      });
+      els.groupList.addEventListener("drop", (event) => {
+        if (!dragGroupRow) return;
+        event.preventDefault();
+        dragGroupRow.dropped = true;
+        commitGroupOrder();
+      });
       els.urlInput.addEventListener("input", handleUrlInput);
       els.urlInput.addEventListener("paste", handleUrlPaste);
       els.quickAddForm.addEventListener("submit", saveQuick);
