@@ -3031,7 +3031,8 @@
         return (
           groupSortRank(a.group) - groupSortRank(b.group) ||
           a.group.localeCompare(b.group, "ja") ||
-          compareOrder(a.order, b.order) ||
+          // 未分類はグループ削除等で持ち込まれた order を無視し、常に新しい順を保つ
+          (a.group === NO_GROUP ? 0 : compareOrder(a.order, b.order)) ||
           compareFallback(a, b)
         );
       }
@@ -3944,7 +3945,13 @@
       function togglePin(id) {
         state.links = state.links.map((link) =>
           link.id === id
-            ? { ...link, pinned: !link.pinned, updatedAt: Date.now() }
+            ? {
+                ...link,
+                pinned: !link.pinned,
+                // 解除時は手動順を破棄し、再ピン時に「未設定は末尾」のルールへ戻す
+                pinnedOrder: link.pinned ? undefined : link.pinnedOrder,
+                updatedAt: Date.now(),
+              }
             : link,
         );
         persist();
