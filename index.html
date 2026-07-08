@@ -924,12 +924,30 @@
       }
 
       .row-index {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        text-align: left;
+        justify-self: start;
+        cursor: pointer;
         color: var(--muted);
         font-size: 12px;
         font-family:
           ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono",
           Menlo, monospace;
         line-height: 1.4;
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        text-underline-offset: 3px;
+        transition:
+          color 120ms ease,
+          text-decoration-color 120ms ease;
+      }
+
+      .row-index:hover {
+        color: var(--accent);
+        text-decoration-color: currentColor;
       }
 
       .row-title {
@@ -962,6 +980,21 @@
       .row-title-button:hover {
         color: var(--ink);
         text-decoration-color: currentColor;
+      }
+
+      .row-title-input {
+        width: 100%;
+        min-width: 0;
+        height: 28px;
+        margin: -5px 0;
+        border: 1px solid var(--focus);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--ink);
+        font: inherit;
+        font-weight: 600;
+        padding: 0 8px;
+        outline: none;
       }
 
       .row-url {
@@ -2908,6 +2941,7 @@
         groupFilter: "",
         collapsedGroups: [],
         editingGroup: null,
+        editingLinkTitleId: null,
         pendingImport: null,
         copiedLinkId: null,
         formLoadedFor: null,
@@ -3961,19 +3995,47 @@
           const row = document.createElement("article");
           row.className = "row";
 
-          const rowIndex = document.createElement("div");
+          const rowIndex = document.createElement("button");
+          rowIndex.type = "button";
           rowIndex.className = "row-index";
           rowIndex.textContent = String(index + 1).padStart(2, "0");
+          rowIndex.title = `${link.title}\nOpen link`;
+          rowIndex.setAttribute("aria-label", `${link.title} を開く`);
+          rowIndex.addEventListener("click", () => openLink(link));
 
           const title = document.createElement("div");
           title.className = "row-title";
-          const titleText = document.createElement("button");
-          titleText.type = "button";
-          titleText.className = "row-title-button";
-          appendHighlighted(titleText, link.title);
-          titleText.title = `${link.title}\nOpen link`;
-          titleText.addEventListener("click", () => openLink(link));
-          title.append(titleText);
+          if (state.editingLinkTitleId === link.id) {
+            const input = document.createElement("input");
+            input.className = "row-title-input";
+            input.value = link.title;
+            input.addEventListener("keydown", (event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commitLinkTitleEdit(link, input.value);
+              }
+              if (event.key === "Escape") {
+                event.preventDefault();
+                cancelLinkTitleEdit();
+              }
+            });
+            input.addEventListener("blur", () =>
+              commitLinkTitleEdit(link, input.value),
+            );
+            requestAnimationFrame(() => {
+              input.focus();
+              input.select();
+            });
+            title.append(input);
+          } else {
+            const titleText = document.createElement("button");
+            titleText.type = "button";
+            titleText.className = "row-title-button";
+            appendHighlighted(titleText, link.title);
+            titleText.title = `${link.title}\nクリックしてタイトルを編集`;
+            titleText.addEventListener("click", () => startLinkTitleEdit(link));
+            title.append(titleText);
+          }
 
           const url = document.createElement("button");
           url.type = "button";
@@ -4531,6 +4593,37 @@
         render();
         showToast("グループを追加しました");
         els.newGroupInput.focus();
+      }
+
+      function startLinkTitleEdit(link) {
+        state.editingLinkTitleId = link.id;
+        render();
+      }
+
+      function cancelLinkTitleEdit() {
+        state.editingLinkTitleId = null;
+        render();
+      }
+
+      function commitLinkTitleEdit(link, value) {
+        // Enter 確定後の re-render で外れた input の blur を無害化する
+        if (state.editingLinkTitleId !== link.id) return;
+
+        const next = value.trim();
+        if (!next || next === link.title) {
+          cancelLinkTitleEdit();
+          return;
+        }
+
+        state.links = state.links.map((item) =>
+          item.id === link.id
+            ? { ...item, title: next, updatedAt: Date.now() }
+            : item,
+        );
+        state.editingLinkTitleId = null;
+        persist();
+        render();
+        showToast("タイトルを変更しました");
       }
 
       function startGroupRename(group) {
