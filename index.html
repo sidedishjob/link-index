@@ -924,12 +924,30 @@
       }
 
       .row-index {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        text-align: left;
+        justify-self: start;
+        cursor: pointer;
         color: var(--muted);
         font-size: 12px;
         font-family:
           ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono",
           Menlo, monospace;
         line-height: 1.4;
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        text-underline-offset: 3px;
+        transition:
+          color 120ms ease,
+          text-decoration-color 120ms ease;
+      }
+
+      .row-index:hover {
+        color: var(--accent);
+        text-decoration-color: currentColor;
       }
 
       .row-title {
@@ -964,6 +982,21 @@
         text-decoration-color: currentColor;
       }
 
+      .row-title-input {
+        width: 100%;
+        min-width: 0;
+        height: 28px;
+        margin: -5px 0;
+        border: 1px solid var(--focus);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--ink);
+        font: inherit;
+        font-weight: 600;
+        padding: 0 8px;
+        outline: none;
+      }
+
       .row-url {
         appearance: none;
         min-width: 0;
@@ -982,29 +1015,10 @@
         cursor: copy;
       }
 
-      .row-url-cell {
-        min-width: 0;
-        display: grid;
-        gap: 3px;
-      }
-
       .row-url:hover {
         color: var(--ink);
         text-decoration: underline;
         text-underline-offset: 3px;
-      }
-
-      .copy-feedback {
-        min-height: 14px;
-        color: var(--muted);
-        font-size: 11px;
-        line-height: 1.2;
-        opacity: 0;
-        transition: opacity 120ms ease;
-      }
-
-      .copy-feedback.show {
-        opacity: 1;
       }
 
       .row-group {
@@ -2908,6 +2922,8 @@
         groupFilter: "",
         collapsedGroups: [],
         editingGroup: null,
+        editingLinkTitleId: null,
+        editingLinkTitleDraft: null,
         pendingImport: null,
         copiedLinkId: null,
         formLoadedFor: null,
@@ -3199,20 +3215,29 @@
         }
       }
 
+      // render 中は true。replaceChildren がフォーカス中の要素を除去すると
+      // Chrome は blur を同期発火するため、それをユーザー操作の blur と区別する
+      let isRendering = false;
+
       function render() {
-        reconcileActiveTag();
-        const filtered = getFilteredLinks();
-        renderStats(filtered);
-        renderActiveFilters(filtered);
-        renderTags();
-        renderGroups();
-        if (els.groupsModal.classList.contains("open")) renderGroupList();
-        if (state.view === "board") {
-          renderBoard(filtered);
-        } else {
-          renderList(filtered);
+        isRendering = true;
+        try {
+          reconcileActiveTag();
+          const filtered = getFilteredLinks();
+          renderStats(filtered);
+          renderActiveFilters(filtered);
+          renderTags();
+          renderGroups();
+          if (els.groupsModal.classList.contains("open")) renderGroupList();
+          if (state.view === "board") {
+            renderBoard(filtered);
+          } else {
+            renderList(filtered);
+          }
+          updateView();
+        } finally {
+          isRendering = false;
         }
-        updateView();
       }
 
       function renderStats(filtered) {
@@ -3961,19 +3986,62 @@
           const row = document.createElement("article");
           row.className = "row";
 
-          const rowIndex = document.createElement("div");
+          const rowIndex = document.createElement("button");
+          rowIndex.type = "button";
           rowIndex.className = "row-index";
           rowIndex.textContent = String(index + 1).padStart(2, "0");
+          rowIndex.title = `${link.title}\nOpen link`;
+          rowIndex.setAttribute("aria-label", `${link.title} を開く`);
+          rowIndex.addEventListener("click", () => openLink(link));
 
           const title = document.createElement("div");
           title.className = "row-title";
-          const titleText = document.createElement("button");
-          titleText.type = "button";
-          titleText.className = "row-title-button";
-          appendHighlighted(titleText, link.title);
-          titleText.title = `${link.title}\nOpen link`;
-          titleText.addEventListener("click", () => openLink(link));
-          title.append(titleText);
+          if (state.editingLinkTitleId === link.id) {
+            const draft = state.editingLinkTitleDraft;
+            const input = document.createElement("input");
+            input.className = "row-title-input";
+            input.value = draft ?? link.title;
+            // 編集中に無関係な再描画（コピー表示のタイマー等）が起きても下書きを失わない
+            input.addEventListener("input", () => {
+              state.editingLinkTitleDraft = input.value;
+            });
+            input.addEventListener("keydown", (event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commitLinkTitleEdit(link, input.value);
+              }
+              if (event.key === "Escape") {
+                event.preventDefault();
+                cancelLinkTitleEdit();
+              }
+            });
+            input.addEventListener("blur", () => {
+              if (state.editingLinkTitleId !== link.id) return;
+              // 再描画による要素除去でも blur が発火する（Chrome の仕様）。
+              // その場合は確定せず、再描画側に下書きから復元させる
+              if (isRendering) return;
+              // 全体を再描画すると直後にクリックした要素が DOM から外れて click が
+              // 発火しないため、blur 経由の確定はこのセルだけを差し替える
+              state.editingLinkTitleId = null;
+              state.editingLinkTitleDraft = null;
+              const nextTitle = applyLinkTitleEdit(link, input.value);
+              const updated = { ...link, title: nextTitle };
+              title.replaceChildren(rowTitleButton(updated));
+              rowIndex.title = `${nextTitle}\nOpen link`;
+              rowIndex.setAttribute("aria-label", `${nextTitle} を開く`);
+            });
+            requestAnimationFrame(() => {
+              input.focus();
+              if (draft === null) {
+                input.select();
+              } else {
+                input.setSelectionRange(input.value.length, input.value.length);
+              }
+            });
+            title.append(input);
+          } else {
+            title.append(rowTitleButton(link));
+          }
 
           const url = document.createElement("button");
           url.type = "button";
@@ -4531,6 +4599,52 @@
         render();
         showToast("グループを追加しました");
         els.newGroupInput.focus();
+      }
+
+      function rowTitleButton(link) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "row-title-button";
+        appendHighlighted(button, link.title);
+        button.title = `${link.title}\nクリックしてタイトルを編集`;
+        button.addEventListener("click", () => startLinkTitleEdit(link));
+        return button;
+      }
+
+      function startLinkTitleEdit(link) {
+        state.editingLinkTitleId = link.id;
+        state.editingLinkTitleDraft = null;
+        render();
+      }
+
+      function cancelLinkTitleEdit() {
+        state.editingLinkTitleId = null;
+        state.editingLinkTitleDraft = null;
+        render();
+      }
+
+      function applyLinkTitleEdit(link, value) {
+        // state 更新と保存のみ行い、再描画は呼び出し側に任せる。確定後のタイトルを返す
+        const next = value.trim();
+        if (!next || next === link.title) return link.title;
+
+        state.links = state.links.map((item) =>
+          item.id === link.id
+            ? { ...item, title: next, updatedAt: Date.now() }
+            : item,
+        );
+        persist();
+        showToast("タイトルを変更しました");
+        return next;
+      }
+
+      function commitLinkTitleEdit(link, value) {
+        // Enter 確定後の re-render で外れた input の blur を無害化する
+        if (state.editingLinkTitleId !== link.id) return;
+        state.editingLinkTitleId = null;
+        state.editingLinkTitleDraft = null;
+        applyLinkTitleEdit(link, value);
+        render();
       }
 
       function startGroupRename(group) {
