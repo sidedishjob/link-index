@@ -2923,6 +2923,7 @@
         collapsedGroups: [],
         editingGroup: null,
         editingLinkTitleId: null,
+        editingLinkTitleDraft: null,
         pendingImport: null,
         copiedLinkId: null,
         formLoadedFor: null,
@@ -3214,20 +3215,29 @@
         }
       }
 
+      // render 中は true。replaceChildren がフォーカス中の要素を除去すると
+      // Chrome は blur を同期発火するため、それをユーザー操作の blur と区別する
+      let isRendering = false;
+
       function render() {
-        reconcileActiveTag();
-        const filtered = getFilteredLinks();
-        renderStats(filtered);
-        renderActiveFilters(filtered);
-        renderTags();
-        renderGroups();
-        if (els.groupsModal.classList.contains("open")) renderGroupList();
-        if (state.view === "board") {
-          renderBoard(filtered);
-        } else {
-          renderList(filtered);
+        isRendering = true;
+        try {
+          reconcileActiveTag();
+          const filtered = getFilteredLinks();
+          renderStats(filtered);
+          renderActiveFilters(filtered);
+          renderTags();
+          renderGroups();
+          if (els.groupsModal.classList.contains("open")) renderGroupList();
+          if (state.view === "board") {
+            renderBoard(filtered);
+          } else {
+            renderList(filtered);
+          }
+          updateView();
+        } finally {
+          isRendering = false;
         }
-        updateView();
       }
 
       function renderStats(filtered) {
@@ -3987,9 +3997,14 @@
           const title = document.createElement("div");
           title.className = "row-title";
           if (state.editingLinkTitleId === link.id) {
+            const draft = state.editingLinkTitleDraft;
             const input = document.createElement("input");
             input.className = "row-title-input";
-            input.value = link.title;
+            input.value = draft ?? link.title;
+            // 編集中に無関係な再描画（コピー表示のタイマー等）が起きても下書きを失わない
+            input.addEventListener("input", () => {
+              state.editingLinkTitleDraft = input.value;
+            });
             input.addEventListener("keydown", (event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
@@ -4000,22 +4015,32 @@
                 cancelLinkTitleEdit();
               }
             });
-            input.addEventListener("blur", () =>
-              commitLinkTitleEdit(link, input.value),
-            );
+            input.addEventListener("blur", () => {
+              if (state.editingLinkTitleId !== link.id) return;
+              // 再描画による要素除去でも blur が発火する（Chrome の仕様）。
+              // その場合は確定せず、再描画側に下書きから復元させる
+              if (isRendering) return;
+              // 全体を再描画すると直後にクリックした要素が DOM から外れて click が
+              // 発火しないため、blur 経由の確定はこのセルだけを差し替える
+              state.editingLinkTitleId = null;
+              state.editingLinkTitleDraft = null;
+              const nextTitle = applyLinkTitleEdit(link, input.value);
+              const updated = { ...link, title: nextTitle };
+              title.replaceChildren(rowTitleButton(updated));
+              rowIndex.title = `${nextTitle}\nOpen link`;
+              rowIndex.setAttribute("aria-label", `${nextTitle} を開く`);
+            });
             requestAnimationFrame(() => {
               input.focus();
-              input.select();
+              if (draft === null) {
+                input.select();
+              } else {
+                input.setSelectionRange(input.value.length, input.value.length);
+              }
             });
             title.append(input);
           } else {
-            const titleText = document.createElement("button");
-            titleText.type = "button";
-            titleText.className = "row-title-button";
-            appendHighlighted(titleText, link.title);
-            titleText.title = `${link.title}\nクリックしてタイトルを編集`;
-            titleText.addEventListener("click", () => startLinkTitleEdit(link));
-            title.append(titleText);
+            title.append(rowTitleButton(link));
           }
 
           const url = document.createElement("button");
@@ -4576,35 +4601,50 @@
         els.newGroupInput.focus();
       }
 
+      function rowTitleButton(link) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "row-title-button";
+        appendHighlighted(button, link.title);
+        button.title = `${link.title}\nクリックしてタイトルを編集`;
+        button.addEventListener("click", () => startLinkTitleEdit(link));
+        return button;
+      }
+
       function startLinkTitleEdit(link) {
         state.editingLinkTitleId = link.id;
+        state.editingLinkTitleDraft = null;
         render();
       }
 
       function cancelLinkTitleEdit() {
         state.editingLinkTitleId = null;
+        state.editingLinkTitleDraft = null;
         render();
       }
 
-      function commitLinkTitleEdit(link, value) {
-        // Enter 確定後の re-render で外れた input の blur を無害化する
-        if (state.editingLinkTitleId !== link.id) return;
-
+      function applyLinkTitleEdit(link, value) {
+        // state 更新と保存のみ行い、再描画は呼び出し側に任せる。確定後のタイトルを返す
         const next = value.trim();
-        if (!next || next === link.title) {
-          cancelLinkTitleEdit();
-          return;
-        }
+        if (!next || next === link.title) return link.title;
 
         state.links = state.links.map((item) =>
           item.id === link.id
             ? { ...item, title: next, updatedAt: Date.now() }
             : item,
         );
-        state.editingLinkTitleId = null;
         persist();
-        render();
         showToast("タイトルを変更しました");
+        return next;
+      }
+
+      function commitLinkTitleEdit(link, value) {
+        // Enter 確定後の re-render で外れた input の blur を無害化する
+        if (state.editingLinkTitleId !== link.id) return;
+        state.editingLinkTitleId = null;
+        state.editingLinkTitleDraft = null;
+        applyLinkTitleEdit(link, value);
+        render();
       }
 
       function startGroupRename(group) {
