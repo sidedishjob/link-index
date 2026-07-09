@@ -13,6 +13,7 @@
 - **全文検索 / タグ絞り込み** — title / URL / group / tag / note を対象に入力即時で絞り込み。一致箇所はハイライト
 - **タイトル自動入力** — URL の貼り付け時に title 候補を自動推定（SharePoint の `file` / `id` / `RootFolder` / `sourcedoc` などにも対応）
 - **グループ管理** — 工程別グループの追加・リネーム・削除、ボード上での折りたたみ
+- **グループ色** — グループ管理モーダルでプリセット 9 色から色を設定でき、Board のグループセクションに左ボーダーとカラードットで反映される。グループ横断で並ぶ Pinned のカードにも所属グループの色をドットで表示する
 - **手動並び替え** — Board のカードをドラッグ&ドロップでグループ内・Pinned 内で並び替え。グループの表示順もグループ管理モーダルのドラッグで変更できる（検索・タグ絞り込み中と All セクションは対象外）
 - **未分類は Inbox 扱い** — グループ未指定のリンクは List / All セクションの先頭に登録が新しい順で表示され、仮登録したリンクをすぐ見つけてグループ設定できる
 - **Import / Export** — 全データを JSON で書き出し / 取り込み（マージ・置換）
@@ -75,7 +76,9 @@ python3 -m http.server 8000
 ブラウザの localStorage に次の形式で保存する。
 
 - **Key**: `link-index:v1`
-- **Value**: `{ version, groups, collapsedGroups, links }`
+- **Value**: `{ version, groups, groupColors, collapsedGroups, links }`
+
+`groupColors` はグループ名からプリセット色 ID（`gray` / `brown` / `orange` / `yellow` / `green` / `blue` / `purple` / `pink` / `red`）へのマップで、色未設定のグループはキー自体を持たない。
 
 各リンク(`Link`)は次のフィールドを持つ。
 
