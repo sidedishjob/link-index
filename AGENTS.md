@@ -63,6 +63,7 @@ python3 -m http.server 8000
 | `getFilteredLinks` / `compareLinks`                     | 検索クエリ + タグでの絞り込み・並び順の決定            |
 | `enableGridReorder` / `commitLinkOrder`                 | Board カードの D&D 並び替え（`order` / `pinnedOrder`） |
 | `commitGroupOrder`                                      | グループ管理モーダルでのグループ D&D 並び替え          |
+| `GROUP_COLOR_PALETTE` / `setGroupColor`                 | グループ色のプリセット定義と設定（Board へ色を反映）   |
 | `render` ほか `render*`                                 | 描画                                                   |
 | `openModal` / `closeModal` / `saveForm`                 | リンク追加・編集モーダル                               |
 | `openGroupsModal` / `commitGroupRename` / `deleteGroup` | グループ管理（追加・リネーム・削除）                   |
