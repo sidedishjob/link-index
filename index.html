@@ -516,7 +516,6 @@
         border: 1px solid var(--line-strong);
         border-radius: var(--radius);
         background: var(--surface);
-        box-shadow: inset 3px 0 0 var(--accent-soft);
         overflow: hidden;
       }
 
@@ -530,7 +529,7 @@
         min-height: 28px;
         height: 100%;
         border-right: 1px solid var(--line);
-        background: linear-gradient(180deg, #fbfbfa 0%, var(--surface-muted) 100%);
+        background: var(--surface);
         padding: 8px 10px;
       }
 
@@ -885,6 +884,13 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         line-height: 1.3;
+      }
+
+      .board-link-group-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex: 0 0 auto;
       }
 
       .board-link-pin {
@@ -3953,7 +3959,7 @@
         const grid = document.createElement("div");
         grid.className = "link-grid";
         pinnedLinks.forEach((link) => {
-          grid.append(createBoardLinkButton(link));
+          grid.append(createBoardLinkButton(link, { showGroupColor: true }));
         });
         enableGridReorder(grid, "pinnedOrder");
 
@@ -4037,7 +4043,7 @@
         board.append(section);
       }
 
-      function createBoardLinkButton(link) {
+      function createBoardLinkButton(link, options = {}) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "link-button";
@@ -4053,6 +4059,18 @@
 
         const content = document.createElement("span");
         content.className = "board-link-content";
+
+        // Pinned などグループ横断のセクションでのみ所属グループの色を示す
+        if (options.showGroupColor) {
+          const groupColor = getGroupColor(link.group);
+          if (groupColor) {
+            const dot = document.createElement("span");
+            dot.className = "board-link-group-dot";
+            dot.setAttribute("aria-hidden", "true");
+            dot.style.background = groupColor;
+            content.append(dot);
+          }
+        }
 
         const title = document.createElement("span");
         title.className = "board-link-title";
