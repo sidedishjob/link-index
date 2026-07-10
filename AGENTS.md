@@ -2,6 +2,11 @@
 
 Link Index の改修・拡張を行うエージェント / 開発者向けガイド。仕様の一次情報は実装（`index.html`）そのもの。利用者向け説明は [README.md](README.md) を参照。
 
+## Review guidelines
+
+- PRレビュー、レビューコメント、inline comment、指摘タイトル、総評はすべて日本語で書く。
+- コード、識別子、ファイルパス、API名、エラーメッセージ原文は英語のまま保持してよい。
+
 ## このプロジェクトの本質
 
 - **単一 HTML ファイルのアプリ**。`index.html` に HTML / CSS / JavaScript をすべて内包する
@@ -49,23 +54,24 @@ python3 -m http.server 8000
 
 ## 主要なシンボル（index.html 内）
 
-| 名前                                                    | 役割                                              |
-| ------------------------------------------------------- | ------------------------------------------------- |
-| `STORAGE_KEY` / `NO_GROUP` / `DEFAULT_GROUPS`           | 定数                                              |
-| `sampleLinks`                                           | 初回起動時のサンプルデータ                        |
-| `state` / `els`                                         | アプリ状態 / DOM 参照                             |
-| `load` / `persist` / `normalize*`                       | 永続化・データ整形                                |
-| `getFilteredLinks` / `compareLinks`                     | 検索クエリ + タグでの絞り込み・並び順の決定       |
+| 名前                                                    | 役割                                                   |
+| ------------------------------------------------------- | ------------------------------------------------------ |
+| `STORAGE_KEY` / `NO_GROUP` / `DEFAULT_GROUPS`           | 定数                                                   |
+| `sampleLinks`                                           | 初回起動時のサンプルデータ                             |
+| `state` / `els`                                         | アプリ状態 / DOM 参照                                  |
+| `load` / `persist` / `normalize*`                       | 永続化・データ整形                                     |
+| `getFilteredLinks` / `compareLinks`                     | 検索クエリ + タグでの絞り込み・並び順の決定            |
 | `enableGridReorder` / `commitLinkOrder`                 | Board カードの D&D 並び替え（`order` / `pinnedOrder`） |
-| `commitGroupOrder`                                      | グループ管理モーダルでのグループ D&D 並び替え     |
-| `render` ほか `render*`                                 | 描画                                              |
-| `openModal` / `closeModal` / `saveForm`                 | リンク追加・編集モーダル                          |
-| `openGroupsModal` / `commitGroupRename` / `deleteGroup` | グループ管理（追加・リネーム・削除）              |
-| `inferTitleFromUrl` / `parseHtmlLink`                   | title 自動推定（SharePoint 対応含む）             |
-| `exportData` / `importData` / `applyImport`             | JSON の入出力                                     |
-| `clearData` / `restoreSamples` / `renderStorageUsage`   | Data モーダル（全削除・サンプル復元・使用量表示） |
-| `openHelpModal` / `closeHelpModal`                      | Help モーダル（使い方・ショートカット一覧）       |
-| `showToast`                                             | 一時的な通知（保存失敗・容量超過など）            |
+| `commitGroupOrder`                                      | グループ管理モーダルでのグループ D&D 並び替え          |
+| `GROUP_COLOR_PALETTE` / `setGroupColor`                 | グループ色のプリセット定義と設定（Board へ色を反映）   |
+| `render` ほか `render*`                                 | 描画                                                   |
+| `openModal` / `closeModal` / `saveForm`                 | リンク追加・編集モーダル                               |
+| `openGroupsModal` / `commitGroupRename` / `deleteGroup` | グループ管理（追加・リネーム・削除）                   |
+| `inferTitleFromUrl` / `parseHtmlLink`                   | title 自動推定（SharePoint 対応含む）                  |
+| `exportData` / `importData` / `applyImport`             | JSON の入出力                                          |
+| `clearData` / `restoreSamples` / `renderStorageUsage`   | Data モーダル（全削除・サンプル復元・使用量表示）      |
+| `openHelpModal` / `closeHelpModal`                      | Help モーダル（使い方・ショートカット一覧）            |
+| `showToast`                                             | 一時的な通知（保存失敗・容量超過など）                 |
 
 ## コードスタイル
 

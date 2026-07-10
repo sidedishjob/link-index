@@ -516,7 +516,6 @@
         border: 1px solid var(--line-strong);
         border-radius: var(--radius);
         background: var(--surface);
-        box-shadow: inset 3px 0 0 var(--accent-soft);
         overflow: hidden;
       }
 
@@ -530,7 +529,7 @@
         min-height: 28px;
         height: 100%;
         border-right: 1px solid var(--line);
-        background: linear-gradient(180deg, #fbfbfa 0%, var(--surface-muted) 100%);
+        background: var(--surface);
         padding: 8px 10px;
       }
 
@@ -579,6 +578,19 @@
         background: var(--surface);
         overflow: hidden;
         min-width: 0;
+      }
+
+      /* グループに色が設定されているときは左ボーダーと見出しのドットで示す */
+      .group-section.has-group-color {
+        border-left: 3px solid var(--group-color);
+      }
+
+      .group-color-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--group-color);
+        flex-shrink: 0;
       }
 
       .group-section.collapsed {
@@ -872,6 +884,13 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         line-height: 1.3;
+      }
+
+      .board-link-group-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex: 0 0 auto;
       }
 
       .board-link-pin {
@@ -1425,11 +1444,68 @@
 
       .group-item {
         display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto auto;
+        grid-template-columns: auto auto minmax(0, 1fr) auto auto;
         gap: 12px;
         align-items: center;
         min-height: 44px;
         border-bottom: 1px solid var(--line);
+      }
+
+      .group-color-button {
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        background: var(--swatch-color, transparent);
+        padding: 0;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .group-color-button:hover {
+        border-color: var(--focus);
+      }
+
+      /* 色なしは斜線で表す */
+      .group-color-button.no-color,
+      .group-color-swatch.no-color {
+        background:
+          linear-gradient(
+            to top right,
+            transparent calc(50% - 1px),
+            var(--line-strong) calc(50% - 1px),
+            var(--line-strong) calc(50% + 1px),
+            transparent calc(50% + 1px)
+          ),
+          var(--surface);
+      }
+
+      .group-color-palette {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 2px 8px 12px 32px;
+      }
+
+      .group-color-swatch {
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        background: var(--swatch-color, transparent);
+        padding: 0;
+        cursor: pointer;
+      }
+
+      .group-color-swatch:hover {
+        border-color: var(--focus);
+      }
+
+      .group-color-swatch.selected {
+        box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
       }
 
       .group-item.dragging {
@@ -2756,6 +2832,18 @@
         "社内ポータル",
         NO_GROUP,
       ];
+      // グループ色のプリセット。localStorage には id を保存し、描画時に色へ解決する
+      const GROUP_COLOR_PALETTE = [
+        { id: "gray", label: "Gray", value: "#787774" },
+        { id: "brown", label: "Brown", value: "#9f6b53" },
+        { id: "orange", label: "Orange", value: "#d9730d" },
+        { id: "yellow", label: "Yellow", value: "#cb912f" },
+        { id: "green", label: "Green", value: "#448361" },
+        { id: "blue", label: "Blue", value: "#337ea9" },
+        { id: "purple", label: "Purple", value: "#9065b0" },
+        { id: "pink", label: "Pink", value: "#c14c8a" },
+        { id: "red", label: "Red", value: "#d44c47" },
+      ];
 
       function uid() {
         try {
@@ -2907,6 +2995,7 @@
       const state = {
         links: [],
         groups: [...DEFAULT_GROUPS],
+        groupColors: {},
         query: "",
         tag: "all",
         view: "board",
@@ -2922,6 +3011,7 @@
         groupFilter: "",
         collapsedGroups: [],
         editingGroup: null,
+        colorPickerGroup: null,
         editingLinkTitleId: null,
         editingLinkTitleDraft: null,
         pendingImport: null,
@@ -3015,6 +3105,7 @@
             ...savedGroups,
             ...state.links.map((link) => link.group),
           ]);
+          state.groupColors = normalizeGroupColors(parsed.groupColors);
           state.collapsedGroups = Array.isArray(parsed.collapsedGroups)
             ? parsed.collapsedGroups.map(cleanGroup)
             : [];
@@ -3024,6 +3115,7 @@
             ...DEFAULT_GROUPS,
             ...sampleLinks.map((link) => link.group),
           ]);
+          state.groupColors = {};
           persist();
         }
       }
@@ -3035,6 +3127,7 @@
             JSON.stringify({
               version: 1,
               groups: state.groups,
+              groupColors: state.groupColors,
               collapsedGroups: state.collapsedGroups,
               links: state.links,
             }),
@@ -3095,6 +3188,27 @@
         return groups
           .map(cleanGroup)
           .filter((group, index, list) => list.indexOf(group) === index);
+      }
+
+      // グループ名 → プリセット色 id のマップに正規化。未知の色 id や no group は捨てる
+      function normalizeGroupColors(value) {
+        const colors = {};
+        if (!value || typeof value !== "object") return colors;
+        for (const [group, colorId] of Object.entries(value)) {
+          const cleaned = cleanGroup(group);
+          if (cleaned === NO_GROUP) continue;
+          if (GROUP_COLOR_PALETTE.some((preset) => preset.id === colorId)) {
+            colors[cleaned] = colorId;
+          }
+        }
+        return colors;
+      }
+
+      function getGroupColor(group) {
+        const preset = GROUP_COLOR_PALETTE.find(
+          (item) => item.id === state.groupColors[group],
+        );
+        return preset ? preset.value : null;
       }
 
       function normalizeTags(value) {
@@ -3627,6 +3741,23 @@
             if (!dropped) renderGroupList();
           });
 
+          const colorButton = document.createElement("button");
+          colorButton.type = "button";
+          colorButton.className = "group-color-button";
+          const groupColor = getGroupColor(group);
+          if (groupColor) {
+            colorButton.style.setProperty("--swatch-color", groupColor);
+          } else {
+            colorButton.classList.add("no-color");
+          }
+          const pickerOpen = state.colorPickerGroup === group;
+          colorButton.title = "色を変更";
+          colorButton.setAttribute("aria-label", `${group} の色を変更`);
+          colorButton.setAttribute("aria-expanded", String(pickerOpen));
+          colorButton.addEventListener("click", () =>
+            toggleGroupColorPicker(group),
+          );
+
           let name;
           if (state.editingGroup === group) {
             name = document.createElement("input");
@@ -3686,9 +3817,56 @@
             : "グループを削除";
           actions.append(remove);
 
-          item.append(handle, name, meta, actions);
+          item.append(handle, colorButton, name, meta, actions);
+          if (pickerOpen) item.append(createGroupColorPalette(group));
           els.groupList.append(item);
         });
+      }
+
+      // 選択中のグループ行の下に展開するプリセット色パレット（「なし」+ 各色）
+      function createGroupColorPalette(group) {
+        const palette = document.createElement("div");
+        palette.className = "group-color-palette";
+        palette.setAttribute("role", "group");
+        palette.setAttribute("aria-label", `${group} の色を選択`);
+
+        const current = state.groupColors[group];
+        const options = [
+          { id: null, label: "None", value: null },
+          ...GROUP_COLOR_PALETTE,
+        ];
+        options.forEach((option) => {
+          const swatch = document.createElement("button");
+          swatch.type = "button";
+          swatch.className = "group-color-swatch";
+          if (!option.id) swatch.classList.add("no-color");
+          else swatch.style.setProperty("--swatch-color", option.value);
+          const selected = (current || null) === option.id;
+          swatch.classList.toggle("selected", selected);
+          swatch.title = option.label;
+          swatch.setAttribute("aria-label", `${group} を ${option.label} にする`);
+          swatch.setAttribute("aria-pressed", String(selected));
+          swatch.addEventListener("click", () =>
+            setGroupColor(group, option.id),
+          );
+          palette.append(swatch);
+        });
+        return palette;
+      }
+
+      function toggleGroupColorPicker(group) {
+        state.colorPickerGroup = state.colorPickerGroup === group ? null : group;
+        renderGroupList();
+      }
+
+      function setGroupColor(group, colorId) {
+        const next = { ...state.groupColors };
+        if (colorId) next[group] = colorId;
+        else delete next[group];
+        state.groupColors = next;
+        state.colorPickerGroup = null;
+        persist();
+        render();
       }
 
       // --- グループ行のドラッグ&ドロップ並び替え ---
@@ -3781,7 +3959,7 @@
         const grid = document.createElement("div");
         grid.className = "link-grid";
         pinnedLinks.forEach((link) => {
-          grid.append(createBoardLinkButton(link));
+          grid.append(createBoardLinkButton(link, { showGroupColor: true }));
         });
         enableGridReorder(grid, "pinnedOrder");
 
@@ -3803,6 +3981,11 @@
         section.className = "group-section";
         section.classList.toggle("collapsed", isCollapsed);
         if (variant) section.classList.add(variant);
+        const groupColor = getGroupColor(group);
+        if (groupColor) {
+          section.classList.add("has-group-color");
+          section.style.setProperty("--group-color", groupColor);
+        }
 
         const head = document.createElement("div");
         head.className = "group-head";
@@ -3824,7 +4007,14 @@
         const title = document.createElement("h2");
         title.className = "group-title";
         title.textContent = label;
-        titleWrap.append(toggle, title);
+        if (groupColor) {
+          const dot = document.createElement("span");
+          dot.className = "group-color-dot";
+          dot.setAttribute("aria-hidden", "true");
+          titleWrap.append(toggle, dot, title);
+        } else {
+          titleWrap.append(toggle, title);
+        }
         titleArea.append(titleWrap);
         if (showAdd) {
           const add = document.createElement("button");
@@ -3853,7 +4043,7 @@
         board.append(section);
       }
 
-      function createBoardLinkButton(link) {
+      function createBoardLinkButton(link, options = {}) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "link-button";
@@ -3869,6 +4059,18 @@
 
         const content = document.createElement("span");
         content.className = "board-link-content";
+
+        // Pinned などグループ横断のセクションでのみ所属グループの色を示す
+        if (options.showGroupColor) {
+          const groupColor = getGroupColor(link.group);
+          if (groupColor) {
+            const dot = document.createElement("span");
+            dot.className = "board-link-group-dot";
+            dot.setAttribute("aria-hidden", "true");
+            dot.style.background = groupColor;
+            content.append(dot);
+          }
+        }
 
         const title = document.createElement("span");
         title.className = "board-link-title";
@@ -4528,6 +4730,7 @@
       function closeGroupsModal() {
         els.groupsModal.classList.remove("open");
         els.groupForm.reset();
+        state.colorPickerGroup = null;
         onModalClose();
       }
 
@@ -4653,6 +4856,7 @@
           return;
         }
         state.editingGroup = group;
+        state.colorPickerGroup = null;
         renderGroupList();
       }
 
@@ -4687,6 +4891,10 @@
         state.collapsedGroups = state.collapsedGroups.map((item) =>
           item === group ? next : item,
         );
+        if (state.groupColors[group]) {
+          const { [group]: movedColor, ...restColors } = state.groupColors;
+          state.groupColors = { ...restColors, [next]: movedColor };
+        }
         state.editingGroup = null;
         persist();
         render();
@@ -4719,6 +4927,8 @@
         state.collapsedGroups = state.collapsedGroups.filter(
           (item) => item !== group,
         );
+        const { [group]: removedColor, ...restColors } = state.groupColors;
+        state.groupColors = restColors;
         persist();
         render();
         showToast(
@@ -4743,6 +4953,7 @@
           version: 1,
           exportedAt: new Date().toISOString(),
           groups: state.groups,
+          groupColors: state.groupColors,
           links: state.links,
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -4773,6 +4984,8 @@
               : Array.isArray(parsed?.data?.groups)
                 ? parsed.data.groups
                 : [];
+            const rawGroupColors =
+              parsed?.groupColors ?? parsed?.data?.groupColors;
             const imported = rawLinks
               .map(normalizeLink)
               .filter((link) => link.title && link.url);
@@ -4784,7 +4997,11 @@
             const duplicateCount = imported.filter((link) =>
               existingUrls.has(link.url),
             ).length;
-            state.pendingImport = { groups: rawGroups, links: imported };
+            state.pendingImport = {
+              groups: rawGroups,
+              groupColors: normalizeGroupColors(rawGroupColors),
+              links: imported,
+            };
             els.importSummary.innerHTML = `
             <div><strong>${imported.length}</strong> links found.</div>
             <div><strong>${duplicateCount}</strong> duplicate URLs will be skipped on merge.</div>
@@ -4803,12 +5020,14 @@
         if (!state.pendingImport) return;
         const imported = state.pendingImport.links;
         const importedGroups = state.pendingImport.groups;
+        const importedGroupColors = state.pendingImport.groupColors;
         if (mode === "replace") {
           state.links = imported;
           state.groups = getUniqueGroups([
             ...importedGroups,
             ...imported.map((link) => link.group),
           ]);
+          state.groupColors = importedGroupColors;
         } else {
           const existingUrls = new Set(state.links.map((link) => link.url));
           const merged = imported
@@ -4821,6 +5040,11 @@
             ...importedGroups,
             ...imported.map((link) => link.group),
           ]);
+          // マージでは現在の色設定を優先し、未設定のグループだけ取り込む
+          state.groupColors = normalizeGroupColors({
+            ...importedGroupColors,
+            ...state.groupColors,
+          });
         }
         state.pendingImport = null;
         els.importModal.classList.remove("open");
@@ -4948,6 +5172,7 @@
         if (!confirm("すべてのリンクとグループを削除しますか？")) return;
         state.links = [];
         state.groups = [];
+        state.groupColors = {};
         state.collapsedGroups = [];
         persist();
         closeDataModal();
@@ -4965,6 +5190,7 @@
           ...DEFAULT_GROUPS,
           ...state.links.map((link) => link.group),
         ]);
+        state.groupColors = {};
         state.collapsedGroups = [];
         persist();
         closeDataModal();
